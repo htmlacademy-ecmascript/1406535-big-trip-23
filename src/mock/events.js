@@ -1,7 +1,7 @@
 import {getRandomInt, getRandomArrayElement, createRandomIdGenerator} from '../utils.js';
 import {EVENT_TYPES, PLACES} from '../consts.js';
 
-const EVENTS_NUMBER = 3;
+const EVENTS_NUMBER = 10;
 const MAX_PRICE = 10000;
 const MAX_OFFERS_NUMBER = 7;
 const MAX_ID_NUMBER = 100000;
