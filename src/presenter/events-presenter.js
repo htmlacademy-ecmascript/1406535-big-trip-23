@@ -5,8 +5,8 @@ import EditEventView from '../view/edit-event-view.js';
 import EventView from '../view/event-view.js';
 import EventsListView from '../view/events-list-view.js';
 
-export default class Presenter {
-  eventsListComponent = new EventsListView;
+export default class EventsPresenter {
+  eventsListComponent = new EventsListView();
 
   constructor({container}) {
     this.container = container;

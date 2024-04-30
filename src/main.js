@@ -1,13 +1,13 @@
 import {render} from './render.js';
 import FiltersListView from './view/filters-list-view.js';
 import SortListView from './view/sort-list-view.js';
-import Presenter from './presenter/presenter.js';
+import EventsPresenter from './presenter/events-presenter.js';
 
 const filtersContainerElement = document.querySelector('.trip-controls__filters');
 const eventsContainerElement = document.querySelector('.trip-events');
-const presenter = new Presenter({container: eventsContainerElement});
+const eventsPresenter = new EventsPresenter({container: eventsContainerElement});
 
 render(new FiltersListView, filtersContainerElement);
 render(new SortListView, eventsContainerElement);
 
-presenter.init();
+eventsPresenter.init();
