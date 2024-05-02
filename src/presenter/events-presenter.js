@@ -2,7 +2,7 @@ import {render} from '../render.js';
 import EditEventView from '../view/edit-event-view.js';
 import EventView from '../view/event-view.js';
 import EventsListView from '../view/events-list-view.js';
-import {EVENTS_NUMBER, NEW_EVENT} from '../consts.js';
+import {EVENTS_NUMBER} from '../consts.js';
 
 export default class EventsPresenter {
   eventsListComponent = new EventsListView();
