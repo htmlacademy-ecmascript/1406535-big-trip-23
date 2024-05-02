@@ -3,7 +3,6 @@ import AddEventView from '../view/add-event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import EventView from '../view/event-view.js';
 import EventsListView from '../view/events-list-view.js';
-import {getRandomArrayElement} from '../utils.js';
 import {EVENTS_NUMBER} from '../consts.js';
 
 export default class EventsPresenter {
@@ -26,8 +25,8 @@ export default class EventsPresenter {
     render(new EditEventView, this.eventsListComponent.getElement());
   }
 
-  renderEvent() {
-    render(new EventView, this.eventsListComponent.getElement());
+  renderEvent(event) {
+    render(new EventView({event}), this.eventsListComponent.getElement());
   }
 
   init() {
@@ -37,7 +36,8 @@ export default class EventsPresenter {
     this.renderEditEvent();
 
     for (let i = 0; i < EVENTS_NUMBER; i++) {
-      this.renderEvent();
+      const event = this.eventsModel.getEventForView(events[i]);
+      this.renderEvent(event);
     }
   }
 }
