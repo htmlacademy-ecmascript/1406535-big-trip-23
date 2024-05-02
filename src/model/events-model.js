@@ -7,37 +7,20 @@ export default class EventsModel {
   events = createMockEvents();
   destinations = createMockDestinations();
 
-  getEvents() {
-    return this.events;
-  }
-
   getOffers() {
     return this.offers;
   }
 
   getOffersByType(type, ids) {
     const allOffers = this.offers.find((item) => item.type === type).offers;
-    const selectedOffers = [];
 
     if (ids) {
       for (const offer of allOffers) {
-        if (ids.includes(offer.id)) {
-          selectedOffers.push(offer);
-        }
+        offer.mark = ids.includes(offer.id) ? 'checked' : '';
       }
     }
 
-    return selectedOffers.length !== 0 ? selectedOffers : allOffers;
-  }
-
-  getEventForView(event) {
-    const eventDestination = this.getDestinationById(event.destination);
-    event.destination = eventDestination.name;
-
-    const eventOffers = this.getOffersByType(event.type, event.offers);
-    event.offers = eventOffers;
-
-    return event;
+    return allOffers;
   }
 
   getDestinations() {
@@ -46,5 +29,16 @@ export default class EventsModel {
 
   getDestinationById(id) {
     return this.destinations.find((item) => item.id === id);
+  }
+
+  getEvents() {
+    return this.events;
+  }
+
+  getExtendedEvent(event) {
+    event.destination = this.getDestinationById(event.destination);
+    event.offers = this.getOffersByType(event.type, event.offers);
+
+    return event;
   }
 }

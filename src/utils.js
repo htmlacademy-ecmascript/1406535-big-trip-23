@@ -5,11 +5,16 @@ const DATE_FORMATS = {
   brief: 'MMM D',
   time: 'hh:mm',
   machine: 'YYYY-MM-DDTHH:mm',
+  dayTime: 'DD/MM/YY HH:mm',
 };
 
 const extendTwoLetter = (value) => value.toString().padStart(2, '0');
 
 const date = {
+  formatDayTime(value) {
+    return dayjs(value).format(DATE_FORMATS.dayTime);
+  },
+
   formatDay(value) {
     return dayjs(value).format(DATE_FORMATS.day);
   },

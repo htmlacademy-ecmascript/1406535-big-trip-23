@@ -1,9 +1,8 @@
 import {render} from '../render.js';
-import AddEventView from '../view/add-event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import EventView from '../view/event-view.js';
 import EventsListView from '../view/events-list-view.js';
-import {EVENTS_NUMBER} from '../consts.js';
+import {EVENTS_NUMBER, NEW_EVENT} from '../consts.js';
 
 export default class EventsPresenter {
   eventsListComponent = new EventsListView();
@@ -17,12 +16,8 @@ export default class EventsPresenter {
     render(this.eventsListComponent, this.container);
   }
 
-  renderAddEvent() {
-    render(new AddEventView, this.eventsListComponent.getElement());
-  }
-
-  renderEditEvent() {
-    render(new EditEventView, this.eventsListComponent.getElement());
+  renderEditEvent(event) {
+    render(new EditEventView({event}), this.eventsListComponent.getElement());
   }
 
   renderEvent(event) {
@@ -31,13 +26,13 @@ export default class EventsPresenter {
 
   init() {
     const events = [...this.eventsModel.getEvents()];
+    events.map((event) => this.eventsModel.getExtendedEvent(event));
 
     this.renderEventsList();
-    this.renderEditEvent();
+    this.renderEditEvent(events[0]);
 
-    for (let i = 0; i < EVENTS_NUMBER; i++) {
-      const event = this.eventsModel.getEventForView(events[i]);
-      this.renderEvent(event);
+    for (let i = 1; i < EVENTS_NUMBER; i++) {
+      this.renderEvent(events[i]);
     }
   }
 }

@@ -27,6 +27,10 @@ const createDestinationById = (index) => ({
     {
       src: `${SRC_BEGINS_WITH}${getRandomInt(0, MAX_IMAGE_NUMBER)}`,
       description: getRandomArrayElement(SENTENCES)
+    },
+    {
+      src: `${SRC_BEGINS_WITH}${getRandomInt(0, MAX_IMAGE_NUMBER)}`,
+      description: getRandomArrayElement(SENTENCES)
     }
   ]
 });

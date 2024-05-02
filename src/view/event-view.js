@@ -4,12 +4,16 @@ import {date} from '../utils.js';
 const createOffersTemplate = (offers) => `
   <h4 class="visually-hidden">Offers:</h4>
   <ul class="event__selected-offers">
-    ${offers.map((offer) => `
-      <li class="event__offer">
-        <span class="event__offer-title">${offer.title}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offer.price}</span>
-      </li>`).join('\n')}
+    ${offers.map((offer) => {
+    if (offer.mark) {
+      return `
+          <li class="event__offer">
+            <span class="event__offer-title">${offer.title}</span>
+              &plus;&euro;&nbsp;
+            <span class="event__offer-price">${offer.price}</span>
+          </li>`;
+    }
+  }).join('\n')}
   </ul>`;
 
 const createEventTemplate = (event) => {
@@ -23,10 +27,9 @@ const createEventTemplate = (event) => {
   const eventEndTimeMachine = date.formatMachineTime(dateTo);
   const eventDuration = date.calculateDuration(dateFrom, dateTo);
 
-
-  let selectedOffers = '';
+  let offersBlock = '';
   if (offers.lenght !== 0) {
-    selectedOffers = createOffersTemplate(offers);
+    offersBlock = createOffersTemplate(offers);
   }
 
   const FavoriteClassName = event.isFavorite ? 'event__favorite-btn--active' : '';
@@ -38,7 +41,7 @@ const createEventTemplate = (event) => {
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${type} ${event.destination}</h3>
+      <h3 class="event__title">${type} ${event.destination.name}</h3>
       <div class="event__schedule">
         <p class="event__time">
           <time class="event__start-time" datetime="${eventStartTimeMachine}">${eventStartTime}</time>
@@ -51,7 +54,7 @@ const createEventTemplate = (event) => {
         &euro;&nbsp;
         <span class="event__price-value">${event.basePrice}</span>
       </p>
-      ${selectedOffers}
+      ${offersBlock}
       <button class="event__favorite-btn ${FavoriteClassName}" type="button">
         <span class="visually-hidden">Add to favorite</span>
         <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
