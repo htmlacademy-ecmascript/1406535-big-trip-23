@@ -18,8 +18,8 @@ export default class EventsPresenter {
     render(new EditEventView({event, destinations, offers}), this.eventsListComponent.getElement());
   }
 
-  renderEvent(event, destinations, offers) {
-    render(new EventView({event, destinations, offers}), this.eventsListComponent.getElement());
+  renderEvent(event, destination, offers) {
+    render(new EventView({event, destination, offers}), this.eventsListComponent.getElement());
   }
 
   init() {
@@ -27,12 +27,16 @@ export default class EventsPresenter {
     const destinations = [...this.eventsModel.getDestinations()];
     const offers = [...this.eventsModel.getOffers()];
 
+    const getOffersByType = (type) => offers.find((element) => element.type === type).offers;
+    const getDestinationById = (id) => destinations.find((element) => element.id === id);
+
     this.renderEventsList();
-    // this.renderEditEvent(events[0]);
+    this.renderEditEvent(events[0], destinations, getOffersByType(events[0].type));
 
     events.forEach((event) => {
-      const typeOffers = offers.find((element) => element.type === event.type).offers;
-      this.renderEvent(event, destinations, typeOffers);
+      const typeOffers = getOffersByType(event.type);
+      const destination = getDestinationById(event.destination);
+      this.renderEvent(event, destination, typeOffers);
     });
   }
 }

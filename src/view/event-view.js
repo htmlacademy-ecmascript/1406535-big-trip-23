@@ -6,10 +6,8 @@ const createOfferTemplate = ({title, price}) =>
     &plus;&euro;&nbsp; <span class="event__offer-price">${price}</span>
   </li>`;
 
-const createEventTemplate = (event, destinations, offers) => {
+const createEventTemplate = (event, destination, offers) => {
   const {type, offers: offersIds, dateFrom, dateTo} = event;
-
-  const destination = destinations.find((element) => element.id === event.destination).name;
 
   const eventDate = date.formatDay(dateFrom);
   const eventDateBrief = date.formatBriefDay(dateFrom);
@@ -19,7 +17,7 @@ const createEventTemplate = (event, destinations, offers) => {
   const eventEndTimeMachine = date.formatMachineTime(dateTo);
   const eventDuration = date.calculateDuration(dateFrom, dateTo);
 
-  const eventOffers = offersIds.length !== 0 ?
+  const offersTemplate = offersIds.length !== 0 ?
     offersIds.map((id) => createOfferTemplate(offers.find((element) => element.id === id))).join('\n') : '';
 
   const FavoriteClassName = event.isFavorite ? 'event__favorite-btn--active' : '';
@@ -33,7 +31,7 @@ const createEventTemplate = (event, destinations, offers) => {
           <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
         </div>
 
-        <h3 class="event__title">${type} ${destination}</h3>
+        <h3 class="event__title">${type} ${destination.name}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
@@ -47,7 +45,7 @@ const createEventTemplate = (event, destinations, offers) => {
 
         <h4 class="visually-hidden">Offers:</h4>
         <ul class="event__selected-offers">
-          ${eventOffers}
+          ${offersTemplate}
         </ul>
 
         <button class="event__favorite-btn ${FavoriteClassName}" type="button">
@@ -65,14 +63,14 @@ const createEventTemplate = (event, destinations, offers) => {
 };
 
 export default class EventView {
-  constructor({event, destinations, offers}) {
+  constructor({event, destination, offers}) {
     this.event = event;
-    this.destinations = destinations;
+    this.destination = destination;
     this.offers = offers;
   }
 
   getTemplate() {
-    return createEventTemplate(this.event, this.destinations, this.offers);
+    return createEventTemplate(this.event, this.destination, this.offers);
   }
 
   getElement() {
