@@ -15,4 +15,5 @@ const eventsPresenter = new EventsPresenter({
 render(new FiltersListView, filtersContainerElement);
 render(new SortListView, eventsContainerElement);
 
+eventsModel.init();
 eventsPresenter.init();

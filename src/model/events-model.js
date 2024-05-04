@@ -2,43 +2,32 @@ import {createMockOffers} from '../mock/offers.js';
 import {createMockEvents} from '../mock/events.js';
 import {createMockDestinations} from '../mock/destinations.js';
 
+const mockEvents = createMockEvents();
+const mockDestinations = createMockDestinations();
+const mockOffers = createMockOffers();
+
 export default class EventsModel {
-  offers = createMockOffers();
-  events = createMockEvents();
-  destinations = createMockDestinations();
-
-  getOffers() {
-    return this.offers;
-  }
-
-  getOffersByType(type, ids) {
-    const allOffers = this.offers.find((item) => item.type === type).offers;
-
-    if (ids) {
-      for (const offer of allOffers) {
-        offer.mark = ids.includes(offer.id) ? 'checked' : '';
-      }
-    }
-
-    return allOffers;
-  }
-
-  getDestinations() {
-    return this.destinations;
-  }
-
-  getDestinationById(id) {
-    return this.destinations.find((item) => item.id === id);
+  constructor() {
+    this.events = [];
+    this.destinations = [];
+    this.offers = [];
   }
 
   getEvents() {
     return this.events;
   }
 
-  getExtendedEvent(event) {
-    event.destination = this.getDestinationById(event.destination);
-    event.offers = this.getOffersByType(event.type, event.offers);
+  getDestinations() {
+    return this.destinations;
+  }
 
-    return event;
+  getOffers() {
+    return this.offers;
+  }
+
+  init() {
+    this.events = mockEvents;
+    this.destinations = mockDestinations;
+    this.offers = mockOffers;
   }
 }
