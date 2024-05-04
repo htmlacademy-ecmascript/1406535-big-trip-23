@@ -1,4 +1,4 @@
-import {getRandomInt, getRandomArrayElement, createRandomIdGenerator} from '../utils.js';
+import {getRandomInt, getRandomArrayElement, createRandomIdGenerator} from '../utils/utils.js';
 import {EVENT_TYPES, PLACES} from '../consts.js';
 
 const EVENTS_NUMBER = 10;

@@ -1,5 +1,5 @@
 import {createElement} from '../render.js';
-import {date} from '../utils.js';
+import {date} from '../utils/date.js';
 
 const createOffersTemplate = (offers) => `
   <h4 class="visually-hidden">Offers:</h4>

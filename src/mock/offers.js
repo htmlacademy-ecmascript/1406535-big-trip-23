@@ -1,4 +1,4 @@
-import {getRandomInt} from '../utils.js';
+import {getRandomInt} from '../utils/utils.js';
 import {EVENT_TYPES} from '../consts.js';
 
 const OFFERS_TITLE = [

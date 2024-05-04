@@ -1,7 +1,7 @@
 import {createElement} from '../render.js';
 import TypesListView from '../view/types-list-view.js';
 import EventDetailsView from '../view/event-details-view.js';
-import {date} from '../utils.js';
+import {date} from '../utils/date.js';
 
 const createEditEventTemplate = (event) => {
   const {offers, destination, type, basePrice, dateFrom, dateTo} = event;

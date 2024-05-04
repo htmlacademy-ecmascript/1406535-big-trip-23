@@ -1,4 +1,4 @@
-import {getRandomInt, getRandomArrayElement} from '../utils.js';
+import {getRandomInt, getRandomArrayElement} from '../utils/utils.js';
 import {PLACES} from '../consts.js';
 
 const SENTENCES = [
