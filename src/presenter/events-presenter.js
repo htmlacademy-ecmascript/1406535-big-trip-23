@@ -1,39 +1,42 @@
 import {render} from '../render.js';
-
-import AddEventView from '../view/add-event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import EventView from '../view/event-view.js';
 import EventsListView from '../view/events-list-view.js';
-
 export default class EventsPresenter {
   eventsListComponent = new EventsListView();
 
-  constructor({container}) {
+  constructor({container, model}) {
     this.container = container;
+    this.eventsModel = model;
   }
 
   renderEventsList() {
     render(this.eventsListComponent, this.container);
   }
 
-  renderAddEvent() {
-    render(new AddEventView, this.eventsListComponent.getElement());
+  renderEditEvent(event, destinations, offers) {
+    render(new EditEventView({event, destinations, offers}), this.eventsListComponent.getElement());
   }
 
-  renderEditEvent() {
-    render(new EditEventView, this.eventsListComponent.getElement());
-  }
-
-  renderEvent() {
-    render(new EventView, this.eventsListComponent.getElement());
+  renderEvent(event, destination, offers) {
+    render(new EventView({event, destination, offers}), this.eventsListComponent.getElement());
   }
 
   init() {
-    this.renderEventsList();
-    this.renderEditEvent();
+    const events = [...this.eventsModel.getEvents()];
+    const destinations = [...this.eventsModel.getDestinations()];
+    const offers = [...this.eventsModel.getOffers()];
 
-    for (let i = 0; i < 3; i++) {
-      this.renderEvent();
-    }
+    const getOffersByType = (type) => offers.find((element) => element.type === type).offers;
+    const getDestinationById = (id) => destinations.find((element) => element.id === id);
+
+    this.renderEventsList();
+    this.renderEditEvent(events[0], destinations, getOffersByType(events[0].type));
+
+    events.forEach((event) => {
+      const typeOffers = getOffersByType(event.type);
+      const destination = getDestinationById(event.destination);
+      this.renderEvent(event, destination, typeOffers);
+    });
   }
 }
