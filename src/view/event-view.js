@@ -1,5 +1,6 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {date} from '../utils/date.js';
+import {EXPAND_BUTTON_CLASS} from '../consts.js';
 
 const createOfferTemplate = ({title, price}) =>
   `<li class="event__offer"><span class="event__offer-title">${title}</span>
@@ -62,19 +63,28 @@ const createEventTemplate = (event, destination, offers) => {
     </li>`);
 };
 
-export default class EventView extends AbstractView{
+export default class EventView extends AbstractView {
   #event = null;
   #destination = null;
   #offers = null;
+  #handleEditClick = null;
 
-  constructor({event, destination, offers}) {
+  constructor({event, destination, offers, onEditClick}) {
     super();
     this.#event = event;
     this.#destination = destination;
     this.#offers = offers;
+    this.#handleEditClick = onEditClick;
+
+    this.element.querySelector(EXPAND_BUTTON_CLASS).addEventListener('click', this.#editClickHandler);
   }
 
   get template() {
     return createEventTemplate(this.#event, this.#destination, this.#offers);
   }
+
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 }

@@ -1,10 +1,13 @@
-import {render} from '../framework/render.js';
+import {render, replace, remove} from '../framework/render.js';
 import EditEventView from '../view/edit-event-view.js';
 import EventView from '../view/event-view.js';
 import EventsListView from '../view/events-list-view.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
+  #events = [];
+  #destinations = [];
+  #offers = [];
 
   #eventsListComponent = new EventsListView();
 
@@ -13,33 +16,57 @@ export default class EventsPresenter {
     this.#eventsModel = model;
   }
 
-  renderEventsList() {
+  #renderEventsList() {
     render(this.#eventsListComponent, this.#container);
   }
 
-  renderEditEvent(event, destinations, offers) {
-    render(new EditEventView({event, destinations, offers}), this.#eventsListComponent.element);
-  }
+  #getOffersByType = (type) => this.#offers.find((element) => element.type === type).offers;
 
-  renderEvent(event, destination, offers) {
-    render(new EventView({event, destination, offers}), this.#eventsListComponent.element);
-  }
+  #getDestinationById = (id) => this.#destinations.find((element) => element.id === id);
 
   init() {
-    const events = [...this.#eventsModel.getEvents()];
-    const destinations = [...this.#eventsModel.getDestinations()];
-    const offers = [...this.#eventsModel.getOffers()];
+    this.#events = [...this.#eventsModel.getEvents()];
+    this.#destinations = [...this.#eventsModel.getDestinations()];
+    this.#offers = [...this.#eventsModel.getOffers()];
 
-    const getOffersByType = (type) => offers.find((element) => element.type === type).offers;
-    const getDestinationById = (id) => destinations.find((element) => element.id === id);
+    this.#renderEventsList();
 
-    this.renderEventsList();
-    this.renderEditEvent(events[0], destinations, getOffersByType(events[0].type));
+    this.#events.forEach((event) => this.#renderItem(event));
+  }
 
-    events.forEach((event) => {
-      const typeOffers = getOffersByType(event.type);
-      const destination = getDestinationById(event.destination);
-      this.renderEvent(event, destination, typeOffers);
-    });
+  #renderItem(event) {
+    const escKeydownHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.preventDefault();
+        replaceEditToView();
+        document.removeEventListener('keydown', escKeydownHandler);
+      }
+    };
+
+    const typeOffers = this.#getOffersByType(event.type);
+    const destination = this.#getDestinationById(event.destination);
+    const destinations = this.#destinations;
+
+    const viewEventComponent = new EventView({event, destination, offers: typeOffers,
+      onEditClick: () => {
+        replaceViewToEdit();
+        document.addEventListener('keydown', escKeydownHandler);
+      }});
+
+    const editEventComponent = new EditEventView({event, destinations, offers: typeOffers,
+      onFormSubmit: () => {
+        replaceEditToView();
+        document.removeEventListener('keydown', escKeydownHandler);
+      }});
+
+    function replaceViewToEdit() {
+      replace(editEventComponent, viewEventComponent);
+    }
+
+    function replaceEditToView() {
+      replace(viewEventComponent, editEventComponent);
+    }
+
+    render(viewEventComponent, this.#eventsListComponent.element);
   }
 }
