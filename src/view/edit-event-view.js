@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import TypesListView from '../view/types-list-view.js';
 import EventDetailsView from '../view/event-details-view.js';
 import {date} from '../utils/date.js';
@@ -9,11 +9,11 @@ const createEditEventTemplate = (event, destinations, offers) => {
   const eventStart = date.formatDayTime(dateFrom);
   const eventEnd = date.formatDayTime(dateTo);
 
-  const typesListTemplate = new TypesListView(type).getTemplate();
+  const typesListTemplate = new TypesListView(type).template;
 
   const destination = destinations.find((element) => element.id === destinationId);
 
-  const detailsTemplate = offers || destinations ? new EventDetailsView({offers, offersIds, destination}).getTemplate() : '';
+  const detailsTemplate = offers || destinations ? new EventDetailsView({offers, offersIds, destination}).template : '';
 
   return (
     `<li class="trip-events__item">
@@ -57,26 +57,19 @@ const createEditEventTemplate = (event, destinations, offers) => {
   </li>`);
 };
 
-export default class EditEventView {
+export default class EditEventView extends AbstractView {
+  #event = null;
+  #destinations = null;
+  #offers = null;
+
   constructor({event, destinations, offers}) {
-    this.event = event;
-    this.destinations = destinations;
-    this.offers = offers;
+    super();
+    this.#event = event;
+    this.#destinations = destinations;
+    this.#offers = offers;
   }
 
-  getTemplate() {
-    return createEditEventTemplate(this.event, this.destinations, this.offers);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEditEventTemplate(this.#event, this.#destinations, this.#offers);
   }
 }

@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const createOfferTemplate = (offer, offersIds) => {
   const id = offer.title.split(' ').pop();
@@ -20,25 +20,17 @@ const createOffersTemplate = (offers, offersIds = []) =>
     </div>
   </section>`;
 
-export default class OffersView {
+export default class OffersView extends AbstractView {
+  #offers = null;
+  #offersIds = null;
+
   constructor({offers, offersIds}) {
-    this.offers = offers;
-    this.offersIds = offersIds;
+    super();
+    this.#offers = offers;
+    this.#offersIds = offersIds;
   }
 
-  getTemplate() {
-    return createOffersTemplate(this.offers, this.offersIds);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createOffersTemplate(this.#offers, this.#offersIds);
   }
 }

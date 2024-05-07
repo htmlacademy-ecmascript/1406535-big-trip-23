@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {EVENT_TYPES, EVENT_DEFAULT_TYPE} from '../consts.js';
 
 const createTypeTemplate = (type, selectedType = EVENT_DEFAULT_TYPE) =>
@@ -23,24 +23,15 @@ const createTypesListTemplate = (type = EVENT_DEFAULT_TYPE) =>
       </fieldset>
     </div>
   </div>`;
-export default class TypesListView {
+export default class TypesListView extends AbstractView {
+  #type = null;
+
   constructor(type) {
-    this.type = type;
+    super();
+    this.#type = type;
   }
 
-  getTemplate() {
-    return createTypesListTemplate(this.type);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createTypesListTemplate(this.#type);
   }
 }
