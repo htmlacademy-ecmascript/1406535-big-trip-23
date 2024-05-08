@@ -25,16 +25,16 @@ export default class EventsPresenter {
   #getDestinationById = (id) => this.#destinations.find((element) => element.id === id);
 
   init() {
-    this.#events = [...this.#eventsModel.getEvents()];
-    this.#destinations = [...this.#eventsModel.getDestinations()];
-    this.#offers = [...this.#eventsModel.getOffers()];
+    this.#events = [...this.#eventsModel.events];
+    this.#destinations = [...this.#eventsModel.destinations];
+    this.#offers = [...this.#eventsModel.offers];
 
     this.#renderEventsList();
 
-    this.#events.forEach((event) => this.#renderItem(event));
+    this.#events.forEach((event) => this.#renderEvent(event));
   }
 
-  #renderItem(event) {
+  #renderEvent(event) {
     const escKeydownHandler = (evt) => {
       if (evt.key === 'Escape') {
         evt.preventDefault();

@@ -7,27 +7,25 @@ const mockDestinations = createMockDestinations();
 const mockOffers = createMockOffers();
 
 export default class EventsModel {
-  constructor() {
-    this.events = [];
-    this.destinations = [];
-    this.offers = [];
+  #events = null;
+  #destinations = null;
+  #offers = null;
+
+  get events() {
+    return this.#events;
   }
 
-  getEvents() {
-    return this.events;
+  get destinations() {
+    return this.#destinations;
   }
 
-  getDestinations() {
-    return this.destinations;
-  }
-
-  getOffers() {
-    return this.offers;
+  get offers() {
+    return this.#offers;
   }
 
   init() {
-    this.events = mockEvents;
-    this.destinations = mockDestinations;
-    this.offers = mockOffers;
+    this.#events = mockEvents;
+    this.#destinations = mockDestinations;
+    this.#offers = mockOffers;
   }
 }
