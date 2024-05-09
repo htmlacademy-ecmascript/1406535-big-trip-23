@@ -1,7 +1,8 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import TypesListView from '../view/types-list-view.js';
 import EventDetailsView from '../view/event-details-view.js';
 import {date} from '../utils/date.js';
+import {EXPAND_BUTTON_CLASS} from '../consts.js';
 
 const createEditEventTemplate = (event, destinations, offers) => {
   const {offers: offersIds, destination: destinationId, type, basePrice, dateFrom, dateTo} = event;
@@ -9,11 +10,11 @@ const createEditEventTemplate = (event, destinations, offers) => {
   const eventStart = date.formatDayTime(dateFrom);
   const eventEnd = date.formatDayTime(dateTo);
 
-  const typesListTemplate = new TypesListView(type).getTemplate();
+  const typesListTemplate = new TypesListView(type).template;
 
   const destination = destinations.find((element) => element.id === destinationId);
 
-  const detailsTemplate = offers || destinations ? new EventDetailsView({offers, offersIds, destination}).getTemplate() : '';
+  const detailsTemplate = offers || destinations ? new EventDetailsView({offers, offersIds, destination}).template : '';
 
   return (
     `<li class="trip-events__item">
@@ -57,26 +58,36 @@ const createEditEventTemplate = (event, destinations, offers) => {
   </li>`);
 };
 
-export default class EditEventView {
-  constructor({event, destinations, offers}) {
-    this.event = event;
-    this.destinations = destinations;
-    this.offers = offers;
+export default class EditEventView extends AbstractView {
+  #event = null;
+  #destinations = null;
+  #offers = null;
+  #onReset = null;
+  #onSubmit = null;
+
+  constructor({event, destinations, offers, onFormSubmit, onFormReset}) {
+    super();
+    this.#event = event;
+    this.#destinations = destinations;
+    this.#offers = offers;
+    this.#onReset = onFormReset;
+    this.#onSubmit = onFormSubmit;
+
+    this.element.querySelector('form').addEventListener('submit', this.#onFormSubmit);
+    this.element.querySelector(EXPAND_BUTTON_CLASS).addEventListener('click', this.#onViewButtonClick);
   }
 
-  getTemplate() {
-    return createEditEventTemplate(this.event, this.destinations, this.offers);
+  get template() {
+    return createEditEventTemplate(this.#event, this.#destinations, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #onFormSubmit = (evt) => {
+    evt.preventDefault();
+    this.#onSubmit();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #onViewButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#onReset();
+  };
 }

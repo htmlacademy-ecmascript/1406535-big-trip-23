@@ -1,5 +1,6 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {date} from '../utils/date.js';
+import {EXPAND_BUTTON_CLASS} from '../consts.js';
 
 const createOfferTemplate = ({title, price}) =>
   `<li class="event__offer"><span class="event__offer-title">${title}</span>
@@ -62,26 +63,28 @@ const createEventTemplate = (event, destination, offers) => {
     </li>`);
 };
 
-export default class EventView {
-  constructor({event, destination, offers}) {
-    this.event = event;
-    this.destination = destination;
-    this.offers = offers;
+export default class EventView extends AbstractView {
+  #event = null;
+  #destination = null;
+  #offers = null;
+  #onEdit = null;
+
+  constructor({event, destination, offers, onEdit}) {
+    super();
+    this.#event = event;
+    this.#destination = destination;
+    this.#offers = offers;
+    this.#onEdit = onEdit;
+
+    this.element.querySelector(EXPAND_BUTTON_CLASS).addEventListener('click', this.#onEditButtonClick);
   }
 
-  getTemplate() {
-    return createEventTemplate(this.event, this.destination, this.offers);
+  get template() {
+    return createEventTemplate(this.#event, this.#destination, this.#offers);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #onEditButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#onEdit();
+  };
 }
