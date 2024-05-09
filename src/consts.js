@@ -17,15 +17,4 @@ const NEW_EVENT = {
 const HOURS_IN_DAY = 24;
 const MINUTES_IN_HOUR = 60;
 
-const FilterType = {
-  EVERYTHING: 'everything',
-  FUTURE: 'future',
-  PRESENT: 'present',
-  PAST: 'past',
-};
-
-const EXPAND_BUTTON_CLASS = '.event__rollup-btn';
-const FORM_SUBMIT_CLASS = '.event__save-btn';
-const FORM_RESET_CLASS = '.event__reset-btn';
-
-export {EVENT_TYPES, PLACES, EVENTS_NUMBER, NEW_EVENT, HOURS_IN_DAY, MINUTES_IN_HOUR, EVENT_DEFAULT_TYPE, EXPAND_BUTTON_CLASS, FORM_RESET_CLASS, FORM_SUBMIT_CLASS, FilterType};
+export {EVENT_TYPES, PLACES, EVENTS_NUMBER, NEW_EVENT, HOURS_IN_DAY, MINUTES_IN_HOUR, EVENT_DEFAULT_TYPE};
