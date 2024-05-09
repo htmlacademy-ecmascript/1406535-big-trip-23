@@ -11,6 +11,8 @@ const DATE_FORMATS = {
 
 const extendTwoLetter = (value) => value.toString().padStart(2, '0');
 
+const currentDate = dayjs();
+
 const date = {
   formatDayTime(value) {
     return dayjs(value).format(DATE_FORMATS.dayTime);
@@ -47,7 +49,21 @@ const date = {
       (resultHours ? `${restHours}H` : ''),
       `${restMinutes}M`);
     return result.join(' ').trim();
-  }
+  },
+
+  isCurrent(start, end) {
+    const today = this.formatDay(currentDate);
+
+    return this.formatDay(start) <= today && this.formatDay(end) >= today;
+  },
+
+  isFuture(start) {
+    return this.formatDay(start) > this.formatDay(currentDate);
+  },
+
+  isPast(end) {
+    return this.formatDay(end) < this.formatDay(currentDate);
+  },
 };
 
 export {date};
