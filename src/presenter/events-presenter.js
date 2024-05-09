@@ -1,18 +1,31 @@
 import {render, replace} from '../framework/render.js';
-import EditEventView from '../view/edit-event-view.js';
-import EventView from '../view/event-view.js';
+import SortListView from '../view/sort-list-view.js';
 import EventsListView from '../view/events-list-view.js';
+import EventView from '../view/event-view.js';
+import EditEventView from '../view/edit-event-view.js';
+import MessageView from '../view/message-view.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
   #events = [];
   #destinations = [];
   #offers = [];
+  #isLoadFail = false;
+  #filter = 'everything';
   #eventsListComponent = new EventsListView();
+  #sortListComponent = new SortListView();
 
   constructor({container, model}) {
     this.#container = container;
     this.#eventsModel = model;
+  }
+
+  set filter(value) {
+    this.#filter = value;
+  }
+
+  get filter() {
+    return this.#filter;
   }
 
   init() {
@@ -20,6 +33,14 @@ export default class EventsPresenter {
     this.#destinations = [...this.#eventsModel.destinations];
     this.#offers = [...this.#eventsModel.offers];
 
+    if (this.#isLoadFail) {
+      render(new MessageView({errorLoading: true}), this.#container);
+      return;
+    } else if (!this.#isLoadFail && this.#events.length === 0) {
+      render(new MessageView({filter: this.#filter}), this.#container);
+      return;
+    }
+    render(this.#sortListComponent, this.#container);
     render(this.#eventsListComponent, this.#container);
     this.#events.forEach((event) => this.#renderEvent(event));
   }

@@ -1,6 +1,5 @@
 import {render} from './framework/render.js';
 import FiltersListView from './view/filters-list-view.js';
-import SortListView from './view/sort-list-view.js';
 import EventsPresenter from './presenter/events-presenter.js';
 import EventsModel from './model/events-model.js';
 
@@ -13,7 +12,7 @@ const eventsPresenter = new EventsPresenter({
 });
 
 render(new FiltersListView, filtersContainerElement);
-render(new SortListView, eventsContainerElement);
 
 eventsModel.init();
+eventsPresenter.filter = 'everything';
 eventsPresenter.init();
