@@ -4,6 +4,7 @@ import EventsListView from '../view/events-list-view.js';
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import MessageView from '../view/message-view.js';
+import {filtrate, DEFAULT_FILTER} from '../utils/filter.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
@@ -11,7 +12,7 @@ export default class EventsPresenter {
   #destinations = [];
   #offers = [];
   #isLoadFail = false;
-  #filter = 'everything';
+  #filter = DEFAULT_FILTER;
   #eventsListComponent = new EventsListView();
   #sortListComponent = new SortListView();
 
@@ -30,6 +31,10 @@ export default class EventsPresenter {
 
   init() {
     this.#events = [...this.#eventsModel.events];
+    if (this.#filter !== DEFAULT_FILTER) {
+      this.#events = filtrate[this.#filter](this.#events);
+    }
+
     this.#destinations = [...this.#eventsModel.destinations];
     this.#offers = [...this.#eventsModel.offers];
 

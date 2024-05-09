@@ -1,6 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {date} from '../utils/date.js';
-import {EXPAND_BUTTON_CLASS} from '../consts.js';
 
 const createOfferTemplate = ({title, price}) =>
   `<li class="event__offer"><span class="event__offer-title">${title}</span>
@@ -76,7 +75,7 @@ export default class EventView extends AbstractView {
     this.#offers = offers;
     this.#onEdit = onEdit;
 
-    this.element.querySelector(EXPAND_BUTTON_CLASS).addEventListener('click', this.#onEditButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onEditButtonClick);
   }
 
   get template() {

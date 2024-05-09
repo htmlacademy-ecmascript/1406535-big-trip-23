@@ -2,7 +2,6 @@ import AbstractView from '../framework/view/abstract-view.js';
 import TypesListView from '../view/types-list-view.js';
 import EventDetailsView from '../view/event-details-view.js';
 import {date} from '../utils/date.js';
-import {EXPAND_BUTTON_CLASS} from '../consts.js';
 
 const createEditEventTemplate = (event, destinations, offers) => {
   const {offers: offersIds, destination: destinationId, type, basePrice, dateFrom, dateTo} = event;
@@ -74,7 +73,7 @@ export default class EditEventView extends AbstractView {
     this.#onSubmit = onFormSubmit;
 
     this.element.querySelector('form').addEventListener('submit', this.#onFormSubmit);
-    this.element.querySelector(EXPAND_BUTTON_CLASS).addEventListener('click', this.#onViewButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onViewButtonClick);
   }
 
   get template() {
