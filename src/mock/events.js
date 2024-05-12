@@ -31,8 +31,8 @@ const createEvent = () => {
 
   const offers = offersNumber ? Array.from({length: offersNumber}, (_, index) => `${type[0]}-${index + 1}`) : [];
 
-  let date1 = `2019-${getRandomMonth()}-${getRandomDays()}T${getRandomHours()}:${getRandomMinutes()}:${getRandomSeconds()}.${getRandomMSeconds()}5Z`;
-  let date2 = `2019-${getRandomMonth()}-${getRandomDays()}T${getRandomHours()}:${getRandomMinutes()}:${getRandomSeconds()}.${getRandomMSeconds()}5Z`;
+  let date1 = `2024-${getRandomMonth()}-${getRandomDays()}T${getRandomHours()}:${getRandomMinutes()}:${getRandomSeconds()}.${getRandomMSeconds()}5Z`;
+  let date2 = `2024-${getRandomMonth()}-${getRandomDays()}T${getRandomHours()}:${getRandomMinutes()}:${getRandomSeconds()}.${getRandomMSeconds()}5Z`;
   if (date1 > date2) {
     [date1, date2] = [date2, date1];
   }

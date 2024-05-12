@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {HOURS_IN_DAY, MINUTES_IN_HOUR} from '../consts.js';
+import { HOURS_IN_DAY, MINUTES_IN_HOUR } from '../consts.js';
 
 const DATE_FORMATS = {
   day: 'YYYY-MM-DD',
@@ -47,7 +47,19 @@ const date = {
       (resultHours ? `${restHours}H` : ''),
       `${restMinutes}M`);
     return result.join(' ').trim();
-  }
+  },
+
+  isCurrent(start, end) {
+    return dayjs().isAfter(start, 'day') || dayjs().isSame(start, 'day') && dayjs().isBefore(end, 'day') || dayjs().isSame(end, 'day');
+  },
+
+  isFuture(start) {
+    return dayjs().isBefore(start, 'day');
+  },
+
+  isPast(end) {
+    return dayjs().isAfter(end, 'day');
+  },
 };
 
-export {date};
+export { date };
