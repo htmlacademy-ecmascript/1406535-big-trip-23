@@ -30,7 +30,15 @@ export default class TripInfoPresenter {
     this.#filters = getFilters(events);
 
     render(this.#tripHeaderComponent, this.#container);
-    render(new FiltersListView({ filters: this.#filters, currentFilter: this.#filter }), this.#container);
+    render(new FiltersListView({
+      filters: this.#filters,
+      currentFilter: this.#filter,
+      onChange: this.#onFilterChange,
+    }), this.#container);
     render(this.#buttonComponent, this.#container);
   }
+
+  #onFilterChange = (filter) => {
+    this.#filter = filter;
+  };
 }

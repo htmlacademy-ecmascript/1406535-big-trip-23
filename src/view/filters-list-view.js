@@ -1,5 +1,4 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {DEFAULT_FILTER} from '../utils/filter.js';
 
 const createFilterTemplate = ({filter, isAvailable}, currentFilter) => {
   const disabledSign = !isAvailable ? 'disabled' : '';
@@ -26,14 +25,22 @@ const createFiltersListTemplate = (filters, currentFilter) =>
 export default class FiltersListView extends AbstractView {
   #filters = null;
   #currentFilter = null;
+  #onChange = null;
 
-  constructor({filters, currentFilter = DEFAULT_FILTER}) {
+  constructor({filters, currentFilter, onChange}) {
     super();
     this.#filters = filters;
     this.#currentFilter = currentFilter;
+    this.#onChange = onChange;
+
+    this.element.querySelector('.trip-filters').addEventListener('click', (evt) => this.#onFilterClick(evt));
   }
 
   get template() {
     return createFiltersListTemplate(this.#filters, this.#currentFilter);
+  }
+
+  #onFilterClick (evt) {
+    this.#onChange(evt.target.value);
   }
 }
