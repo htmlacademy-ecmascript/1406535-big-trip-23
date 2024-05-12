@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {HOURS_IN_DAY, MINUTES_IN_HOUR} from '../consts.js';
+import { HOURS_IN_DAY, MINUTES_IN_HOUR } from '../consts.js';
 
 const DATE_FORMATS = {
   day: 'YYYY-MM-DD',
@@ -10,8 +10,6 @@ const DATE_FORMATS = {
 };
 
 const extendTwoLetter = (value) => value.toString().padStart(2, '0');
-
-const currentDate = dayjs();
 
 const date = {
   formatDayTime(value) {
@@ -52,18 +50,16 @@ const date = {
   },
 
   isCurrent(start, end) {
-    const today = this.formatDay(currentDate);
-
-    return this.formatDay(start) <= today && this.formatDay(end) >= today;
+    return dayjs().isAfter(start, 'day') || dayjs().isSame(start, 'day') && dayjs().isBefore(end, 'day') || dayjs().isSame(end, 'day');
   },
 
   isFuture(start) {
-    return this.formatDay(start) > this.formatDay(currentDate);
+    return dayjs().isBefore(start, 'day');
   },
 
   isPast(end) {
-    return this.formatDay(end) < this.formatDay(currentDate);
+    return dayjs().isAfter(end, 'day');
   },
 };
 
-export {date};
+export { date };

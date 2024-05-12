@@ -23,4 +23,4 @@ const createRandomIdGenerator = (min, max) => {
   };
 };
 
-export {getRandomInt, getRandomArrayElement, createRandomIdGenerator};
+export { getRandomInt, getRandomArrayElement, createRandomIdGenerator };

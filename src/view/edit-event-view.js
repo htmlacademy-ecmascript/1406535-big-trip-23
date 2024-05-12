@@ -1,23 +1,18 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import TypesListView from '../view/types-list-view.js';
 import EventDetailsView from '../view/event-details-view.js';
-import {date} from '../utils/date.js';
+import { date } from '../utils/date.js';
 
 const createEditEventTemplate = (event, destinations, offers) => {
   const {offers: offersIds, destination: destinationId, type, basePrice, dateFrom, dateTo} = event;
-
   const eventStart = date.formatDayTime(dateFrom);
   const eventEnd = date.formatDayTime(dateTo);
-
   const typesListTemplate = new TypesListView(type).template;
-
   const destination = destinations.find((element) => element.id === destinationId);
-
-  const detailsTemplate = offers || destinations ? new EventDetailsView({offers, offersIds, destination}).template : '';
+  const detailsTemplate = offers || destinations ? new EventDetailsView({ offers, offersIds, destination }).template : '';
 
   return (
-    `<li class="trip-events__item">
-      <form class="event event--edit" action="#" method="post">
+    `<form class="event event--edit" action="#" method="post">
         <header class="event__header">
 
           ${typesListTemplate}
@@ -53,8 +48,7 @@ const createEditEventTemplate = (event, destinations, offers) => {
         </header>
 
         ${detailsTemplate}
-      </form>
-  </li>`);
+      </form>`);
 };
 
 export default class EditEventView extends AbstractView {
@@ -64,7 +58,7 @@ export default class EditEventView extends AbstractView {
   #onReset = null;
   #onSubmit = null;
 
-  constructor({event, destinations, offers, onFormSubmit, onFormReset}) {
+  constructor({ event, destinations, offers, onFormSubmit, onFormReset }) {
     super();
     this.#event = event;
     this.#destinations = destinations;
@@ -72,7 +66,7 @@ export default class EditEventView extends AbstractView {
     this.#onReset = onFormReset;
     this.#onSubmit = onFormSubmit;
 
-    this.element.querySelector('form').addEventListener('submit', this.#onFormSubmit);
+    this.element.addEventListener('submit', this.#onFormSubmit);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onViewButtonClick);
   }
 

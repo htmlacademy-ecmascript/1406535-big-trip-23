@@ -1,24 +1,26 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {DEFAULT_FILTER} from '../utils/filter.js';
+import { DEFAULT_FILTER } from '../utils/filter.js';
 
-
-const createMessageTemplate = (err, filter) => {
+const createMessageText = (err, filter) => {
   if (err) {
-    return '<p class="trip-events__msg">Failed to load latest route information</p>';
+    return 'Failed to load latest route information';
   }
+
   return filter === DEFAULT_FILTER ?
-    '<p class="trip-events__msg">Click New Event to create your first point</p>' :
-    `<p class="trip-events__msg">There are no ${filter} events now</p>`;
+    'Click New Event to create your first point' :
+    `There are no ${filter} events now`;
 };
 
-export default class MessageView extends AbstractView {
-  #filter = null;
-  #err = null;
+const createMessageTemplate = (err, filter) => `<p class="trip-events__msg">${createMessageText(err, filter)}</p>`;
 
-  constructor({errorLoading = false, filter}) {
+export default class MessageView extends AbstractView {
+  #err = null;
+  #filter = null;
+
+  constructor({ err, filter }) {
     super();
+    this.#err = err;
     this.#filter = filter;
-    this.#err = errorLoading;
   }
 
   get template() {

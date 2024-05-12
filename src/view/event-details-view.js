@@ -2,9 +2,9 @@ import AbstractView from '../framework/view/abstract-view.js';
 import DestinationView from '../view/destination-view.js';
 import OffersView from '../view/offers-view.js';
 
-const createEventDetailsTemplate = (offers = [], offersIds = [], destination = '') => {
-  const offersTemplate = offers ? new OffersView({offers, offersIds}).template : '';
-  const destinationTemplate = destination ? new DestinationView({destination}).template : '';
+const createEventDetailsTemplate = (offers, offersIds, destination) => {
+  const offersTemplate = offers ? new OffersView({ offers, offersIds }).template : '';
+  const destinationTemplate = destination ? new DestinationView({ destination }).template : '';
 
   return `<section class="event__details">
     ${offersTemplate}
@@ -17,7 +17,7 @@ export default class EventDetailsView extends AbstractView {
   #offersIds = null;
   #destination = null;
 
-  constructor({offers, offersIds, destination}) {
+  constructor({ offers, offersIds, destination }) {
     super();
     this.#offers = offers;
     this.#offersIds = offersIds;

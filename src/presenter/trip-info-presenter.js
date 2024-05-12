@@ -1,18 +1,18 @@
-import {render} from '../framework/render.js';
-import {getFilters, DEFAULT_FILTER} from '../utils/filter.js';
 import TripHeaderView from '../view/trip-header-view.js';
 import FiltersListView from '../view/filters-list-view.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
+import { render } from '../framework/render.js';
+import { getFilters, DEFAULT_FILTER } from '../utils/filter.js';
 
 export default class TripInfoPresenter {
   #container = null;
   #eventsModel = null;
   #filters = null;
   #filter = DEFAULT_FILTER;
-  #tripHeaderComponent = new TripHeaderView('123');
+  #tripHeaderComponent = new TripHeaderView();
   #buttonComponent = new NewEventButtonView();
 
-  constructor({container, model}) {
+  constructor({ container, model }) {
     this.#container = container;
     this.#eventsModel = model;
   }
@@ -30,11 +30,13 @@ export default class TripInfoPresenter {
     this.#filters = getFilters(events);
 
     render(this.#tripHeaderComponent, this.#container);
+
     render(new FiltersListView({
       filters: this.#filters,
       currentFilter: this.#filter,
       onChange: this.#onFilterChange,
     }), this.#container);
+
     render(this.#buttonComponent, this.#container);
   }
 

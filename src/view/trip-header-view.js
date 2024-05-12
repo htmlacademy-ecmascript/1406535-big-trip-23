@@ -14,14 +14,7 @@ const createTripHeaderTemplate = () =>
   </section>`;
 
 export default class TripHeaderView extends AbstractView {
-  #data;
-
-  constructor({data}) {
-    super();
-    this.#data = data;
-  }
-
   get template() {
-    return createTripHeaderTemplate(this.#data);
+    return createTripHeaderTemplate();
   }
 }

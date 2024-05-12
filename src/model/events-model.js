@@ -1,6 +1,6 @@
-import {createMockOffers} from '../mock/offers.js';
-import {createMockEvents} from '../mock/events.js';
-import {createMockDestinations} from '../mock/destinations.js';
+import { createMockOffers } from '../mock/offers.js';
+import { createMockEvents } from '../mock/events.js';
+import { createMockDestinations } from '../mock/destinations.js';
 
 const mockEvents = createMockEvents();
 const mockDestinations = createMockDestinations();

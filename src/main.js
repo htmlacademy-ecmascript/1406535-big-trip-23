@@ -6,6 +6,7 @@ const tripInfoContainerElement = document.querySelector('.trip-main');
 const eventsContainerElement = document.querySelector('.trip-events');
 
 const eventsModel = new EventsModel();
+eventsModel.init();
 
 const eventsPresenter = new EventsPresenter({
   container: eventsContainerElement,
@@ -17,8 +18,7 @@ const tripInfoPresenter = new TripInfoPresenter({
   model: eventsModel
 });
 
-eventsModel.init();
-eventsPresenter.filter = 'present';
+eventsPresenter.filter = 'everything';
 eventsPresenter.init();
-tripInfoPresenter.filter = 'present';
+tripInfoPresenter.filter = 'everything';
 tripInfoPresenter.init();

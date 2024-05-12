@@ -1,4 +1,4 @@
-import {date} from './date.js';
+import { date } from './date.js';
 
 const FilterType = {
   ALL: 'everything',
@@ -18,7 +18,7 @@ const filtrate = {
 
 const getFilters = (events) =>
   Object.entries(filtrate).map(
-    ([type, filtered]) => ({ filter: type, isAvailable: filtered(events).length !== 0})
+    ([type, filtered]) => ({ filter: type, isAvailable: filtered(events).length !== 0 })
   );
 
-export {filtrate, FilterType, DEFAULT_FILTER, getFilters};
+export { filtrate, FilterType, DEFAULT_FILTER, getFilters };
