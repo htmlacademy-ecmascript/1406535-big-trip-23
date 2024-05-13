@@ -48,12 +48,9 @@ export default class EventsPresenter {
     this.#renderEventsList();
   }
 
-  #getOffersByType = (type) => this.#offers.find((element) => element.type === type).offers;
-  #getDestinationById = (id) => this.#destinations.find((element) => element.id === id);
-
   #renderEvent(event) {
-    const typeOffers = this.#getOffersByType(event.type);
-    const destination = this.#getDestinationById(event.destination);
+    const typeOffers = this.#eventsModel.getOffersByType(event.type);
+    const destination = this.#eventsModel.getDestinationById(event.destination);
     const destinations = this.#destinations;
 
     const onEscKeydown = (evt) => {
