@@ -9,6 +9,7 @@ export default class EventsPresenter {
   #eventsModel = null;
   #events = null;
   #isLoadFail = false;
+  #eventPresenters = new Map();
   #eventsListComponent = new EventsListView();
   #sortListComponent = new SortListView();
   _filter = DEFAULT_FILTER;
@@ -60,7 +61,8 @@ export default class EventsPresenter {
       container: this.#eventsListComponent.element,
       model: this.#eventsModel,
     });
-
     eventPresenter.init(event);
+
+    this.#eventPresenters.set(event.id, eventPresenter);
   }
 }
