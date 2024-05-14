@@ -39,7 +39,6 @@ export default class EventPresenter {
 
     const prevViewEventComponent = this.#viewEventComponent;
     const prevEditEventComponent = this.#editEventComponent;
-
     const typeOffers = this.#eventsModel.getOffersByType(this.#event.type);
     const destination = this.#eventsModel.getDestinationById(this.#event.destination);
 
@@ -115,6 +114,7 @@ export default class EventPresenter {
   };
 
   #onFormSubmit = () => {
+    // this.#onDataChange();
     this.#changeEditToView();
   };
 

@@ -2,7 +2,7 @@ import SortListView from '../view/sort-list-view.js';
 import EventsListView from '../view/events-list-view.js';
 import MessageView from '../view/message-view.js';
 import EventPresenter from './event-presenter.js';
-import { render } from '../framework/render.js';
+import { render, RenderPosition } from '../framework/render.js';
 import { filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { updateItem } from '../utils/utils.js';
 export default class EventsPresenter {
@@ -18,6 +18,8 @@ export default class EventsPresenter {
   constructor({ container, model }) {
     this.#container = container;
     this.#eventsModel = model;
+
+    render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
   }
 
   set filter(value) {
@@ -45,15 +47,14 @@ export default class EventsPresenter {
   }
 
   #renderEmptyListMessage() {
-    render(new MessageView({ err: this.#isLoadFail, filter: this.filter }), this.#container);
+    render(new MessageView({ err: this.#isLoadFail, filter: this.filter }), this.#container, RenderPosition.AFTERBEGIN);
   }
 
   #renderSortList() {
-    render(this.#sortListComponent, this.#container);
+    render(this.#sortListComponent, this.#container, RenderPosition.AFTERBEGIN);
   }
 
   #renderEventsList() {
-    render(this.#eventsListComponent, this.#container);
     this.#events.forEach((event) => this.#renderEvent(event));
   }
 
@@ -64,8 +65,8 @@ export default class EventsPresenter {
       onDataChange: this.#onDataChange,
       onModeChange: this.#onModeChange,
     });
-    eventPresenter.init(event);
 
+    eventPresenter.init(event);
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
