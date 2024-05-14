@@ -4,6 +4,7 @@ import MessageView from '../view/message-view.js';
 import EventPresenter from './event-presenter.js';
 import { render } from '../framework/render.js';
 import { filtrate, DEFAULT_FILTER } from '../utils/filter.js';
+import { updateItem } from '../utils/utils.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
@@ -60,9 +61,15 @@ export default class EventsPresenter {
     const eventPresenter = new EventPresenter({
       container: this.#eventsListComponent.element,
       model: this.#eventsModel,
+      onDataChange: this.#onDataChange,
     });
     eventPresenter.init(event);
 
     this.#eventPresenters.set(event.id, eventPresenter);
   }
+
+  #onDataChange = (update) => {
+    this.#events = updateItem(this.#events, update);
+    this.#eventPresenters.get(update.id).init(update);
+  };
 }

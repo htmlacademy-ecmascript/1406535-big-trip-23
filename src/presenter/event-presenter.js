@@ -10,16 +10,19 @@ export default class EventPresenter {
   #destinations = null;
   #offers = null;
   #event = null;
-  #eventsListItemComponent = new EventsListItemView();
+  #eventsListItemComponent = null;
   #viewEventComponent = null;
   #editEventComponent = null;
+  #onDataChange = null;
 
-  constructor({ container, model }) {
+  constructor({ container, model, onDataChange }) {
     this.#container = container;
     this.#eventsModel = model;
+    this.#onDataChange = onDataChange;
     this.#destinations = model.destinations;
     this.#offers = model.offers;
 
+    this.#eventsListItemComponent = new EventsListItemView();
     render(this.#eventsListItemComponent, this.#container);
     this.#eventContainer = this.#eventsListItemComponent.element;
   }
@@ -37,15 +40,16 @@ export default class EventPresenter {
       event: this.#event,
       destination,
       offers: typeOffers,
-      onEdit: () => this.#changeViewToEdit(),
+      onEdit: this.#onEdit,
+      onSelect: this.#onSelect,
     });
 
     this.#editEventComponent = new EditEventView({
       event: this.#event,
       destinations: this.#destinations,
       offers: typeOffers,
-      onFormSubmit: () => this.#changeEditToView(),
-      onFormReset: () => this.#changeEditToView(),
+      onFormSubmit: this.#onFormSubmit,
+      onFormReset: this.#onFormReset,
     });
 
     if (prevViewEventComponent === null || prevEditEventComponent === null) {
@@ -66,8 +70,7 @@ export default class EventPresenter {
   }
 
   destroy() {
-    remove(this.#viewEventComponent);
-    remove(this.#editEventComponent);
+    remove(this.#eventsListItemComponent);
   }
 
   #changeViewToEdit() {
@@ -85,5 +88,21 @@ export default class EventPresenter {
       evt.preventDefault();
       this.#changeEditToView();
     }
+  };
+
+  #onEdit = () => {
+    this.#changeViewToEdit();
+  };
+
+  #onSelect = () => {
+    this.#onDataChange({...this.#event, isFavorite: !this.#event.isFavorite});
+  };
+
+  #onFormSubmit = () => {
+    this.#changeEditToView();
+  };
+
+  #onFormReset = () => {
+    this.#changeEditToView();
   };
 }

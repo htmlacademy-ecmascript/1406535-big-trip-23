@@ -23,4 +23,6 @@ const createRandomIdGenerator = (min, max) => {
   };
 };
 
-export { getRandomInt, getRandomArrayElement, createRandomIdGenerator };
+const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
+
+export { getRandomInt, getRandomArrayElement, createRandomIdGenerator, updateItem };
