@@ -1,18 +1,16 @@
 import SortListView from '../view/sort-list-view.js';
 import EventsListView from '../view/events-list-view.js';
-import EventsListItemView from '../view/events-list-item-view.js';
-import EventView from '../view/event-view.js';
-import EditEventView from '../view/edit-event-view.js';
 import MessageView from '../view/message-view.js';
-import { render, replace } from '../framework/render.js';
+import EventPresenter from './event-presenter.js';
+import { render, RenderPosition } from '../framework/render.js';
 import { filtrate, DEFAULT_FILTER } from '../utils/filter.js';
+import { updateItem } from '../utils/utils.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
   #events = null;
-  #destinations = null;
-  #offers = null;
   #isLoadFail = false;
+  #eventPresenters = new Map();
   #eventsListComponent = new EventsListView();
   #sortListComponent = new SortListView();
   _filter = DEFAULT_FILTER;
@@ -20,6 +18,8 @@ export default class EventsPresenter {
   constructor({ container, model }) {
     this.#container = container;
     this.#eventsModel = model;
+
+    render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
   }
 
   set filter(value) {
@@ -32,12 +32,10 @@ export default class EventsPresenter {
 
   init() {
     this.#events = [...this.#eventsModel.events];
+
     if (this.filter !== DEFAULT_FILTER) {
       this.#events = filtrate[this.filter](this.#events);
     }
-
-    this.#destinations = [...this.#eventsModel.destinations];
-    this.#offers = [...this.#eventsModel.offers];
 
     if (!this.#events.length) {
       this.#renderEmptyListMessage();
@@ -48,64 +46,36 @@ export default class EventsPresenter {
     this.#renderEventsList();
   }
 
-  #getOffersByType = (type) => this.#offers.find((element) => element.type === type).offers;
-  #getDestinationById = (id) => this.#destinations.find((element) => element.id === id);
-
-  #renderEvent(event) {
-    const typeOffers = this.#getOffersByType(event.type);
-    const destination = this.#getDestinationById(event.destination);
-    const destinations = this.#destinations;
-
-    const onEscKeydown = (evt) => {
-      if (evt.key === 'Escape') {
-        evt.preventDefault();
-        changeEditToView();
-      }
-    };
-    const onFormSubmit = () => changeEditToView();
-    const onFormReset = () => changeEditToView();
-
-    const eventsListItemComponent = new EventsListItemView();
-
-    const viewEventComponent = new EventView({
-      event,
-      destination,
-      offers: typeOffers,
-      onEdit: changeViewToEdit,
-    });
-
-    const editEventComponent = new EditEventView({
-      event,
-      destinations,
-      offers: typeOffers,
-      onFormSubmit: onFormSubmit,
-      onFormReset: onFormReset,
-    });
-
-    function changeViewToEdit() {
-      replace(editEventComponent, viewEventComponent);
-      document.addEventListener('keydown', onEscKeydown);
-    }
-
-    function changeEditToView() {
-      replace(viewEventComponent, editEventComponent);
-      document.removeEventListener('keydown', onEscKeydown);
-    }
-
-    render(eventsListItemComponent, this.#eventsListComponent.element);
-    render(viewEventComponent, eventsListItemComponent.element);
-  }
-
   #renderEmptyListMessage() {
-    render(new MessageView({ err: this.#isLoadFail, filter: this.filter }), this.#container);
+    render(new MessageView({ err: this.#isLoadFail, filter: this.filter }), this.#container, RenderPosition.AFTERBEGIN);
   }
 
   #renderSortList() {
-    render(this.#sortListComponent, this.#container);
+    render(this.#sortListComponent, this.#container, RenderPosition.AFTERBEGIN);
   }
 
   #renderEventsList() {
-    render(this.#eventsListComponent, this.#container);
     this.#events.forEach((event) => this.#renderEvent(event));
   }
+
+  #renderEvent(event) {
+    const eventPresenter = new EventPresenter({
+      container: this.#eventsListComponent.element,
+      model: this.#eventsModel,
+      onDataChange: this.#onDataChange,
+      onModeChange: this.#onModeChange,
+    });
+
+    eventPresenter.init(event);
+    this.#eventPresenters.set(event.id, eventPresenter);
+  }
+
+  #onDataChange = (updatedEvent) => {
+    this.#events = updateItem(this.#events, updatedEvent);
+    this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
+  };
+
+  #onModeChange = () => {
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
+  };
 }

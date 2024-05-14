@@ -23,6 +23,14 @@ export default class EventsModel {
     return this.#offers;
   }
 
+  getOffersByType (type) {
+    return this.#offers.find((element) => element.type === type).offers;
+  }
+
+  getDestinationById (id) {
+    return this.#destinations.find((element) => element.id === id);
+  }
+
   init() {
     this.#events = mockEvents;
     this.#destinations = mockDestinations;
