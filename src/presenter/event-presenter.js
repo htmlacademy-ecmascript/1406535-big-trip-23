@@ -3,9 +3,14 @@ import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import { render, replace, remove } from '../framework/render.js';
 
+const Mode = {
+  VIEW: 'view',
+  EDIT: 'edit',
+  NEW: 'new',
+};
+
 export default class EventPresenter {
   #container = null;
-  #eventContainer = null;
   #eventsModel = null;
   #destinations = null;
   #offers = null;
@@ -14,17 +19,19 @@ export default class EventPresenter {
   #viewEventComponent = null;
   #editEventComponent = null;
   #onDataChange = null;
+  #onModeChange = null;
+  #mode = Mode.VIEW;
 
-  constructor({ container, model, onDataChange }) {
+  constructor({ container, model, onDataChange, onModeChange }) {
     this.#container = container;
     this.#eventsModel = model;
     this.#onDataChange = onDataChange;
+    this.#onModeChange = onModeChange;
     this.#destinations = model.destinations;
     this.#offers = model.offers;
 
     this.#eventsListItemComponent = new EventsListItemView();
     render(this.#eventsListItemComponent, this.#container);
-    this.#eventContainer = this.#eventsListItemComponent.element;
   }
 
   init(event) {
@@ -53,20 +60,26 @@ export default class EventPresenter {
     });
 
     if (prevViewEventComponent === null || prevEditEventComponent === null) {
-      render(this.#viewEventComponent, this.#eventContainer);
+      render(this.#viewEventComponent, this.#eventsListItemComponent.element);
       return;
     }
 
-    if (this.#eventContainer.contains(prevViewEventComponent.element)) {
+    if (this.#mode === Mode.VIEW) {
       replace(this.#viewEventComponent, prevViewEventComponent);
     }
 
-    if (this.#eventContainer.contains(prevEditEventComponent.element)) {
+    if (this.#mode === Mode.EDIT) {
       replace(this.#editEventComponent, prevEditEventComponent);
     }
 
     remove(prevViewEventComponent);
     remove(prevEditEventComponent);
+  }
+
+  resetView() {
+    if (this.#mode !== Mode.VIEW) {
+      this.#changeEditToView();
+    }
   }
 
   destroy() {
@@ -76,11 +89,14 @@ export default class EventPresenter {
   #changeViewToEdit() {
     replace(this.#editEventComponent, this.#viewEventComponent);
     document.addEventListener('keydown', this.#onEscKeydown);
+    this.#onModeChange();
+    this.#mode = Mode.EDIT;
   }
 
   #changeEditToView() {
     replace(this.#viewEventComponent, this.#editEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
+    this.#mode = Mode.VIEW;
   }
 
   #onEscKeydown = (evt) => {

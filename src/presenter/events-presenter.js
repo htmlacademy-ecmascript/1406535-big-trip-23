@@ -62,14 +62,19 @@ export default class EventsPresenter {
       container: this.#eventsListComponent.element,
       model: this.#eventsModel,
       onDataChange: this.#onDataChange,
+      onModeChange: this.#onModeChange,
     });
     eventPresenter.init(event);
 
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
-  #onDataChange = (update) => {
-    this.#events = updateItem(this.#events, update);
-    this.#eventPresenters.get(update.id).init(update);
+  #onDataChange = (updatedEvent) => {
+    this.#events = updateItem(this.#events, updatedEvent);
+    this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
+  };
+
+  #onModeChange = () => {
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 }
