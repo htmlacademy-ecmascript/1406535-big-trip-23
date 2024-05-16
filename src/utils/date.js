@@ -50,15 +50,15 @@ const date = {
   },
 
   isCurrent(start, end) {
-    return dayjs().isAfter(start, 'day') || dayjs().isSame(start, 'day') && dayjs().isBefore(end, 'day') || dayjs().isSame(end, 'day');
+    return dayjs().isAfter(start) || dayjs().isSame(start) && dayjs().isBefore(end) || dayjs().isSame(end);
   },
 
   isFuture(start) {
-    return dayjs().isBefore(start, 'day');
+    return dayjs().isBefore(start);
   },
 
   isPast(end) {
-    return dayjs().isAfter(end, 'day');
+    return dayjs().isAfter(end);
   },
 };
 
