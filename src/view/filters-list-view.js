@@ -1,13 +1,15 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
+const ID_PREFIX = 'filter-';
+
 const createFilterTemplate = ({ filter, isAvailable }, currentFilter) => {
   const disabledSign = !isAvailable ? 'disabled' : '';
   const checkedSign = filter === currentFilter ? 'checked' : '';
 
   return `<div class="trip-filters__filter">
-    <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter"
+    <input id="${ID_PREFIX}${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter"
       value="${filter}" ${checkedSign} ${disabledSign}>
-    <label class="trip-filters__filter-label" for="filter-${filter}">${filter}</label>
+    <label class="trip-filters__filter-label" for="${ID_PREFIX}${filter}">${filter}</label>
   </div>`;
 };
 
@@ -33,14 +35,14 @@ export default class FiltersListView extends AbstractView {
     this.#currentFilter = currentFilter;
     this.#onChange = onChange;
 
-    this.element.querySelector('.trip-filters').addEventListener('change', (evt) => this.#onFilterChange(evt));
+    this.element.querySelector('form').addEventListener('change', this.#onFilterChange);
   }
 
   get template() {
     return createFiltersListTemplate(this.#filters, this.#currentFilter);
   }
 
-  #onFilterChange (evt) {
-    this.#onChange(evt.target.value);
-  }
+  #onFilterChange = (evt) => {
+    this.#onChange(evt.target.id.replace(ID_PREFIX, ''));
+  };
 }

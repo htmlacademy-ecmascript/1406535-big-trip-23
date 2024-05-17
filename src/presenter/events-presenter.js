@@ -4,6 +4,7 @@ import MessageView from '../view/message-view.js';
 import EventPresenter from './event-presenter.js';
 import { render, RenderPosition } from '../framework/render.js';
 import { filtrate, DEFAULT_FILTER } from '../utils/filter.js';
+import { sorting, DEFAULT_SORT } from '../utils/sort.js';
 import { updateItem } from '../utils/utils.js';
 export default class EventsPresenter {
   #container = null;
@@ -12,8 +13,9 @@ export default class EventsPresenter {
   #isLoadFail = false;
   #eventPresenters = new Map();
   #eventsListComponent = new EventsListView();
-  #sortListComponent = new SortListView();
+  #sortListComponent = null;
   _filter = DEFAULT_FILTER;
+  #sort = DEFAULT_SORT;
 
   constructor({ container, model }) {
     this.#container = container;
@@ -43,7 +45,7 @@ export default class EventsPresenter {
     }
 
     this.#renderSortList();
-    this.#renderEventsList();
+    this.#renderEventsList(sorting[this.#sort](this.#events));
   }
 
   #renderEmptyListMessage() {
@@ -51,11 +53,12 @@ export default class EventsPresenter {
   }
 
   #renderSortList() {
+    this.#sortListComponent = new SortListView({ currentSort: this.#sort, onChange : this.#onSortChange });
     render(this.#sortListComponent, this.#container, RenderPosition.AFTERBEGIN);
   }
 
-  #renderEventsList() {
-    this.#events.forEach((event) => this.#renderEvent(event));
+  #renderEventsList(events) {
+    events.forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
@@ -70,6 +73,11 @@ export default class EventsPresenter {
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
+  #clearEventsList() {
+    this.#eventPresenters.forEach((presenter) => presenter.destroy());
+    this.#eventPresenters.clear();
+  }
+
   #onDataChange = (updatedEvent) => {
     this.#events = updateItem(this.#events, updatedEvent);
     this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
@@ -77,5 +85,11 @@ export default class EventsPresenter {
 
   #onModeChange = () => {
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #onSortChange = (changedSort) => {
+    this.#sort = changedSort;
+    this.#clearEventsList();
+    this.#renderEventsList(sorting[this.#sort](this.#events));
   };
 }

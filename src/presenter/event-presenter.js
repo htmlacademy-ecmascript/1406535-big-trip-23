@@ -83,6 +83,7 @@ export default class EventPresenter {
 
   destroy() {
     remove(this.#eventsListItemComponent);
+    document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
   #changeViewToEdit() {

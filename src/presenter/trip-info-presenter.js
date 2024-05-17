@@ -40,7 +40,7 @@ export default class TripInfoPresenter {
     render(this.#buttonComponent, this.#container);
   }
 
-  #onFilterChange = (filter) => {
-    this.#filter = filter;
+  #onFilterChange = (changedFilter) => {
+    this.#filter = changedFilter;
   };
 }
