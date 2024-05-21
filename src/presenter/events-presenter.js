@@ -1,19 +1,13 @@
-import SortListView from '../view/sort-list-view.js';
-import EventsListView from '../view/events-list-view.js';
-import MessageView from '../view/message-view.js';
 import EventPresenter from './event-presenter.js';
+import EventsListView from '../view/events-list-view.js';
 import { render, RenderPosition } from '../framework/render.js';
-import { filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { updateItem } from '../utils/utils.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
   #events = null;
-  #isLoadFail = false;
   #eventPresenters = new Map();
   #eventsListComponent = new EventsListView();
-  #sortListComponent = new SortListView();
-  _filter = DEFAULT_FILTER;
 
   constructor({ container, model }) {
     this.#container = container;
@@ -22,40 +16,9 @@ export default class EventsPresenter {
     render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
   }
 
-  set filter(value) {
-    this._filter = value;
-  }
-
-  get filter() {
-    return this._filter;
-  }
-
-  init() {
-    this.#events = [...this.#eventsModel.events];
-
-    if (this.filter !== DEFAULT_FILTER) {
-      this.#events = filtrate[this.filter](this.#events);
-    }
-
-    if (!this.#events.length) {
-      this.#renderEmptyListMessage();
-      return;
-    }
-
-    this.#renderSortList();
-    this.#renderEventsList();
-  }
-
-  #renderEmptyListMessage() {
-    render(new MessageView({ err: this.#isLoadFail, filter: this.filter }), this.#container, RenderPosition.AFTERBEGIN);
-  }
-
-  #renderSortList() {
-    render(this.#sortListComponent, this.#container, RenderPosition.AFTERBEGIN);
-  }
-
-  #renderEventsList() {
-    this.#events.forEach((event) => this.#renderEvent(event));
+  init(events) {
+    this.#events = events;
+    events.forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
@@ -68,6 +31,11 @@ export default class EventsPresenter {
 
     eventPresenter.init(event);
     this.#eventPresenters.set(event.id, eventPresenter);
+  }
+
+  clearEventsList() {
+    this.#eventPresenters.forEach((presenter) => presenter.destroy());
+    this.#eventPresenters.clear();
   }
 
   #onDataChange = (updatedEvent) => {

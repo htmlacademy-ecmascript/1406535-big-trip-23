@@ -12,6 +12,10 @@ const DATE_FORMATS = {
 const extendTwoLetter = (value) => value.toString().padStart(2, '0');
 
 const date = {
+  format(value) {
+    return dayjs(value);
+  },
+
   formatDayTime(value) {
     return dayjs(value).format(DATE_FORMATS.dayTime);
   },
@@ -32,7 +36,7 @@ const date = {
     return dayjs(value).format(DATE_FORMATS.machine);
   },
 
-  calculateDuration(start, end) {
+  calcAndFormatDuration(start, end) {
     start = dayjs(start);
     end = dayjs(end);
 
@@ -49,16 +53,22 @@ const date = {
     return result.join(' ').trim();
   },
 
+  calcDuration(start, end) {
+    start = dayjs(start);
+    end = dayjs(end);
+    return end.diff(start);
+  },
+
   isCurrent(start, end) {
-    return dayjs().isAfter(start, 'day') || dayjs().isSame(start, 'day') && dayjs().isBefore(end, 'day') || dayjs().isSame(end, 'day');
+    return dayjs().isAfter(start) || dayjs().isSame(start) && dayjs().isBefore(end) || dayjs().isSame(end);
   },
 
   isFuture(start) {
-    return dayjs().isBefore(start, 'day');
+    return dayjs().isBefore(start);
   },
 
   isPast(end) {
-    return dayjs().isAfter(end, 'day');
+    return dayjs().isAfter(end);
   },
 };
 

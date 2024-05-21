@@ -15,7 +15,7 @@ const createEventTemplate = (event, destination, offers) => {
   const eventStartTimeMachine = date.formatMachineTime(dateFrom);
   const eventEndTime = date.formatOnlyTime(dateTo);
   const eventEndTimeMachine = date.formatMachineTime(dateTo);
-  const eventDuration = date.calculateDuration(dateFrom, dateTo);
+  const eventDuration = date.calcAndFormatDuration(dateFrom, dateTo);
 
   const offersTemplate = offersIds.length !== 0 ?
     offersIds.map((id) => createOfferTemplate(offers.find((element) => element.id === id))).join('\n') : '';
