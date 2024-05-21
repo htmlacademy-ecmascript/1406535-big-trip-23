@@ -1,21 +1,13 @@
-import SortListView from '../view/sort-list-view.js';
-import EventsListView from '../view/events-list-view.js';
-import MessageView from '../view/message-view.js';
 import EventPresenter from './event-presenter.js';
+import EventsListView from '../view/events-list-view.js';
 import { render, RenderPosition } from '../framework/render.js';
-import { filtrate, DEFAULT_FILTER } from '../utils/filter.js';
-import { sorting, DEFAULT_SORT } from '../utils/sort.js';
 import { updateItem } from '../utils/utils.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
   #events = null;
-  #isLoadFail = false;
   #eventPresenters = new Map();
   #eventsListComponent = new EventsListView();
-  #sortListComponent = null;
-  _filter = DEFAULT_FILTER;
-  #sort = DEFAULT_SORT;
 
   constructor({ container, model }) {
     this.#container = container;
@@ -24,40 +16,8 @@ export default class EventsPresenter {
     render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
   }
 
-  set filter(value) {
-    this._filter = value;
-  }
-
-  get filter() {
-    return this._filter;
-  }
-
-  init() {
-    this.#events = [...this.#eventsModel.events];
-
-    if (this.filter !== DEFAULT_FILTER) {
-      this.#events = filtrate[this.filter](this.#events);
-    }
-
-    if (!this.#events.length) {
-      this.#renderEmptyListMessage();
-      return;
-    }
-
-    this.#renderSortList();
-    this.#renderEventsList(sorting[this.#sort](this.#events));
-  }
-
-  #renderEmptyListMessage() {
-    render(new MessageView({ err: this.#isLoadFail, filter: this.filter }), this.#container, RenderPosition.AFTERBEGIN);
-  }
-
-  #renderSortList() {
-    this.#sortListComponent = new SortListView({ currentSort: this.#sort, onChange : this.#onSortChange });
-    render(this.#sortListComponent, this.#container, RenderPosition.AFTERBEGIN);
-  }
-
-  #renderEventsList(events) {
+  init(events) {
+    this.#events = events;
     events.forEach((event) => this.#renderEvent(event));
   }
 
@@ -73,7 +33,7 @@ export default class EventsPresenter {
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
-  #clearEventsList() {
+  clearEventsList() {
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
   }
@@ -85,11 +45,5 @@ export default class EventsPresenter {
 
   #onModeChange = () => {
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
-  };
-
-  #onSortChange = (changedSort) => {
-    this.#sort = changedSort;
-    this.#clearEventsList();
-    this.#renderEventsList(sorting[this.#sort](this.#events));
   };
 }

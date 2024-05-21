@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { SortType, DISABLED_SORTS } from '../utils/sort.js';
+import { SortType, DISABLED_SORTS, DEFAULT_SORT } from '../utils/sort.js';
 
 const ID_PREFIX = 'sort-';
 
@@ -21,6 +21,7 @@ const createSortListTemplate = (currentSort) =>
 export default class SortListView extends AbstractView {
   #currentSort = null;
   #onChange = null;
+  #sortElements = null;
 
   constructor({ currentSort, onChange }) {
     super();
@@ -28,10 +29,17 @@ export default class SortListView extends AbstractView {
     this.#onChange = onChange;
 
     this.element.addEventListener('change', this.#onSortChange);
+    this.#sortElements = this.element.querySelectorAll('.trip-sort__input');
   }
 
   get template() {
     return createSortListTemplate(this.#currentSort);
+  }
+
+  resetSort() {
+    this.#sortElements.forEach((input) => {
+      input.checked = input.id === `${ID_PREFIX}${DEFAULT_SORT}`;
+    });
   }
 
   #onSortChange = (evt) => {
