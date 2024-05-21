@@ -91,8 +91,8 @@ export default class MainPresenter {
 
   #onFilterChange = (changedFilter) => {
     this.#filter = changedFilter;
-    this.#sort = DEFAULT_SORT;
     this.#events = filtrate[this.#filter](this.#initialEvents);
+    this.#sort = DEFAULT_SORT;
     this.#sortListComponent.resetSort();
     this.#rerenderEventsList();
   };
