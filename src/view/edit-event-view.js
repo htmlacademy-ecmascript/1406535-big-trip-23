@@ -1,15 +1,14 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import TypesListView from '../view/types-list-view.js';
-import EventDetailsView from '../view/event-details-view.js';
+import { createTypesListTemplate, createEventDetailsTemplate } from '../view/edit-event-template.js';
 import { date } from '../utils/date.js';
 
 const createEditEventTemplate = (event, destinations, offers) => {
   const {offers: offersIds, destination: destinationId, type, basePrice, dateFrom, dateTo} = event;
   const eventStart = date.formatDayTime(dateFrom);
   const eventEnd = date.formatDayTime(dateTo);
-  const typesListTemplate = new TypesListView(type).template;
+  const typesListTemplate = createTypesListTemplate(type);
   const destination = destinations.find((element) => element.id === destinationId);
-  const detailsTemplate = offers || destinations ? new EventDetailsView({ offers, offersIds, destination }).template : '';
+  const detailsTemplate = offers || destinations ? createEventDetailsTemplate(offers, offersIds, destination) : '';
 
   return (
     `<form class="event event--edit" action="#" method="post">
