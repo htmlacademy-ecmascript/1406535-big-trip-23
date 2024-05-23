@@ -3,7 +3,7 @@ import { date } from '../utils/date.js';
 import { getObjectFromArrayByKey } from '../utils/utils.js';
 
 
-const createOfferTemplate = ({title, price}) =>
+const createOfferTemplate = ({ title, price }) =>
   `<li class="event__offer"><span class="event__offer-title">${title}</span>
     &plus;&euro;&nbsp; <span class="event__offer-price">${price}</span>
   </li>`;
@@ -56,9 +56,7 @@ const createEventTemplate = (event) => {
         </svg>
       </button>
 
-      <button class="event__rollup-btn" type="button">
-        <span class="visually-hidden">Open event</span>
-      </button>
+      <button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>
     </div>`);
 };
 
