@@ -2,6 +2,7 @@ import EventsListItemView from '../view/events-list-item-view.js';
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import { render, replace, remove } from '../framework/render.js';
+import { getObjectFromArrayByKey } from '../utils/utils.js';
 
 const Mode = {
   VIEW: 'view',
@@ -27,8 +28,8 @@ export default class EventPresenter {
     this.#eventsModel = model;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
-    this.#destinations = model.destinations;
-    this.#offers = model.offers;
+    this.#destinations = this.#eventsModel.destinations;
+    this.#offers = this.#eventsModel.offers;
 
     this.#eventsListItemComponent = new EventsListItemView();
     render(this.#eventsListItemComponent, this.#container);
@@ -39,13 +40,11 @@ export default class EventPresenter {
 
     const prevViewEventComponent = this.#viewEventComponent;
     const prevEditEventComponent = this.#editEventComponent;
-    const typeOffers = this.#eventsModel.getOffersByType(this.#event.type);
-    const destination = this.#eventsModel.getDestinationById(this.#event.destination);
+    const typeOffers = getObjectFromArrayByKey(this.#offers, 'type', this.#event.type).offers;
+    const destinationName = getObjectFromArrayByKey(this.#destinations, 'id', this.#event.destination).name;
 
     this.#viewEventComponent = new EventView({
-      event: this.#event,
-      destination,
-      offers: typeOffers,
+      event: { ... this.#event, destination: destinationName, typeOffers: typeOffers},
       onEdit: this.#onEdit,
       onSelect: this.#onSelect,
     });
@@ -53,7 +52,7 @@ export default class EventPresenter {
     this.#editEventComponent = new EditEventView({
       event: this.#event,
       destinations: this.#destinations,
-      offers: typeOffers,
+      offers: this.#offers,
       onFormSubmit: this.#onFormSubmit,
       onFormReset: this.#onFormReset,
     });
