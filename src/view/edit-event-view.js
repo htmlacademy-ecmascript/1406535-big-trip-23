@@ -2,6 +2,8 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { createTypesListTemplate, createEventDetailsTemplate } from '../view/edit-event-template.js';
 import { date } from '../utils/date.js';
 import { getObjectFromArrayByKey } from '../utils/utils.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createEditEventTemplate = (event, destinations, typeOffers) => {
   const { offers: offersIds, destination: destinationId, type, basePrice, dateFrom, dateTo } = event;
@@ -53,6 +55,8 @@ export default class EditEventView extends AbstractStatefulView {
   #offers = [];
   #event = null;
   #typeOffers = null;
+  #datapickerStart = null;
+  #datapickerEnd = null;
   #onReset = null;
   #onSubmit = null;
 
@@ -66,6 +70,7 @@ export default class EditEventView extends AbstractStatefulView {
     this.#typeOffers = this.#getOffersByType(event.type);
     this._setState(EditEventView.parseEventToState(event));
     this._restoreHandlers();
+    this.#setDatepickers();
   }
 
   get template() {
@@ -78,6 +83,42 @@ export default class EditEventView extends AbstractStatefulView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeChange);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#onPriceChange);
+    this.#setDatepickers();
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datapickerStart) {
+      this.#datapickerStart.destroy();
+      this.#datapickerStart = null;
+      this.#datapickerEnd.destroy();
+      this.#datapickerEnd = null;
+    }
+  }
+
+  #setDatepickers() {
+    this.#datapickerStart = flatpickr(this.element.querySelector('[name="event-start-time"]'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateFrom,
+        maxDate: this._state.dateTo,
+        onChange: this.#onEndDateChange,
+      },
+    );
+
+    this.#datapickerEnd = flatpickr(this.element.querySelector('[name="event-end-time"]'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        'time_24hr': true,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom,
+        onChange: this.#onStartDateChange,
+      },
+    );
   }
 
   reset() {
@@ -107,6 +148,16 @@ export default class EditEventView extends AbstractStatefulView {
   #onDestinationChange = (evt) => this.updateElement({ destination: this.#getDestinationIdByName(evt.target.value) });
 
   #onPriceChange = (evt) => this._setState({ basePrice: evt.target.value });
+
+  #onStartDateChange = ([userDate]) => {
+    this._setState({ dateTo: userDate });
+    this.#datapickerStart.set('maxDate', userDate);
+  };
+
+  #onEndDateChange = ([userDate]) => {
+    this._setState({ dateFrom: userDate });
+    this.#datapickerEnd.set('minDate', userDate);
+  };
 
   static parseEventToState(event) {
     return {...event};
