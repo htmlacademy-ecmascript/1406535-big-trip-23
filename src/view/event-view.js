@@ -19,8 +19,7 @@ const createEventTemplate = (event) => {
   const eventDuration = date.calcAndFormatDuration(dateFrom, dateTo);
 
   const offersTemplate = offersIds.length !== 0 ?
-    offersIds.map((id) => createOfferTemplate(getObjectFromArrayByKey(typeOffers, 'id', id))).join('') :
-    '';
+    offersIds.map((id) => createOfferTemplate(getObjectFromArrayByKey(typeOffers, 'id', id))).join('') : '';
 
   const FavoriteClassName = event.isFavorite ? 'event__favorite-btn--active' : '';
 

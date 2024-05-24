@@ -84,6 +84,17 @@ export default class EditEventView extends AbstractStatefulView {
     this.#setDatepickers();
   }
 
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datapickerStart) {
+      this.#datapickerStart.destroy();
+      this.#datapickerStart = null;
+      this.#datapickerEnd.destroy();
+      this.#datapickerEnd = null;
+    }
+  }
+
   #setDatepickers() {
     this.#datapickerStart = flatpickr(this.element.querySelector('[name="event-start-time"]'),
       {
