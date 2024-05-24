@@ -11,7 +11,7 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
   const eventEnd = date.formatDayTime(dateTo);
   const typesListTemplate = createTypesListTemplate(type);
   const destination = getObjectFromArrayByKey(destinations, 'id', destinationId);
-  const detailsTemplate = typeOffers || destination ? createEventDetailsTemplate(typeOffers, offersIds, destination) : '';
+  const detailsTemplate = typeOffers.length || destination ? createEventDetailsTemplate(typeOffers, offersIds, destination) : '';
 
   return (
     `<form class="event event--edit" action="#" method="post">
@@ -51,10 +51,10 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
 };
 
 export default class EditEventView extends AbstractStatefulView {
+  #event = null;
   #destinations = [];
   #offers = [];
-  #event = null;
-  #typeOffers = null;
+  #typeOffers = [];
   #datapickerStart = null;
   #datapickerEnd = null;
   #onReset = null;
@@ -70,7 +70,6 @@ export default class EditEventView extends AbstractStatefulView {
     this.#typeOffers = this.#getOffersByType(event.type);
     this._setState(EditEventView.parseEventToState(event));
     this._restoreHandlers();
-    this.#setDatepickers();
   }
 
   get template() {
@@ -97,6 +96,10 @@ export default class EditEventView extends AbstractStatefulView {
     }
   }
 
+  reset() {
+    this.updateElement(this.#event);
+  }
+
   #setDatepickers() {
     this.#datapickerStart = flatpickr(this.element.querySelector('[name="event-start-time"]'),
       {
@@ -105,7 +108,7 @@ export default class EditEventView extends AbstractStatefulView {
         'time_24hr': true,
         defaultDate: this._state.dateFrom,
         maxDate: this._state.dateTo,
-        onChange: this.#onEndDateChange,
+        onChange: this.#onStartDateChange,
       },
     );
 
@@ -116,25 +119,10 @@ export default class EditEventView extends AbstractStatefulView {
         'time_24hr': true,
         defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom,
-        onChange: this.#onStartDateChange,
+        onChange: this.#onEndDateChange,
       },
     );
   }
-
-  reset() {
-    this.updateElement(this.#event);
-  }
-
-  #onFormSubmit = (evt) => {
-    evt.preventDefault();
-    this.#onSubmit();
-  };
-
-  #onViewButtonClick = (evt) => {
-    evt.preventDefault();
-    this.reset();
-    this.#onReset();
-  };
 
   #getOffersByType = (type) => getObjectFromArrayByKey(this.#offers, 'type', type)?.offers || [] ;
   #getDestinationIdByName = (name) => getObjectFromArrayByKey(this.#destinations, 'name', name)?.id || '';
@@ -150,13 +138,24 @@ export default class EditEventView extends AbstractStatefulView {
   #onPriceChange = (evt) => this._setState({ basePrice: evt.target.value });
 
   #onStartDateChange = ([userDate]) => {
+    this._setState({ dateFrom: userDate });
+    this.#datapickerEnd.set('minDate', userDate);
+  };
+
+  #onEndDateChange = ([userDate]) => {
     this._setState({ dateTo: userDate });
     this.#datapickerStart.set('maxDate', userDate);
   };
 
-  #onEndDateChange = ([userDate]) => {
-    this._setState({ dateFrom: userDate });
-    this.#datapickerEnd.set('minDate', userDate);
+  #onFormSubmit = (evt) => {
+    evt.preventDefault();
+    this.#onSubmit();
+  };
+
+  #onViewButtonClick = (evt) => {
+    evt.preventDefault();
+    this.reset();
+    this.#onReset();
   };
 
   static parseEventToState(event) {

@@ -63,7 +63,7 @@ const createOffersTemplate = (offers, offersIds = []) =>
   </section>`;
 
 const createEventDetailsTemplate = (offers, offersIds, destination) => {
-  const offersTemplate = offers ? createOffersTemplate(offers, offersIds) : '';
+  const offersTemplate = offers.length ? createOffersTemplate(offers, offersIds) : '';
   const destinationTemplate = destination ? createDestinationTemplate(destination) : '';
 
   return `<section class="event__details">
