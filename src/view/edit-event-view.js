@@ -49,14 +49,16 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
 };
 
 export default class EditEventView extends AbstractStatefulView {
-  #destinations = null;
-  #offers = null;
+  #destinations = [];
+  #offers = [];
+  #event = null;
   #typeOffers = null;
   #onReset = null;
   #onSubmit = null;
 
   constructor({ event, destinations, offers, onFormSubmit, onFormReset }) {
     super();
+    this.#event = event;
     this.#destinations = destinations;
     this.#offers = offers;
     this.#onReset = onFormReset;
@@ -78,6 +80,10 @@ export default class EditEventView extends AbstractStatefulView {
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#onPriceChange);
   }
 
+  reset() {
+    this.updateElement(this.#event);
+  }
+
   #onFormSubmit = (evt) => {
     evt.preventDefault();
     this.#onSubmit();
@@ -85,6 +91,7 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onViewButtonClick = (evt) => {
     evt.preventDefault();
+    this.reset();
     this.#onReset();
   };
 

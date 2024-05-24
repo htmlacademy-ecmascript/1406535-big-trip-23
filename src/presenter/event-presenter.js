@@ -101,6 +101,7 @@ export default class EventPresenter {
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
+      this.#editEventComponent.reset();
       this.#changeEditToView();
     }
   };
