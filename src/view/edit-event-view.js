@@ -2,6 +2,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { createTypesListTemplate, createEventDetailsTemplate } from '../view/edit-event-template.js';
 import { date } from '../utils/date.js';
 import { getObjectFromArrayByKey } from '../utils/utils.js';
+import flatpickr from 'flatpickr';
 
 const createEditEventTemplate = (event, destinations, typeOffers) => {
   const { offers: offersIds, destination: destinationId, type, basePrice, dateFrom, dateTo } = event;
