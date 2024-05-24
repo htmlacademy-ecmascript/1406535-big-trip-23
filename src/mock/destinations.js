@@ -21,7 +21,7 @@ const MAX_SENTENCES_NUMBER = 5;
 
 const createDestinationById = (index) => ({
   id: `d-${index + 1}`,
-  description: Array.from({length: getRandomInt(1, MAX_SENTENCES_NUMBER)}, () => getRandomArrayElement(SENTENCES)).join(' '),
+  description: `${PLACES[index]} --- ${Array.from({length: getRandomInt(1, MAX_SENTENCES_NUMBER)}, () => getRandomArrayElement(SENTENCES)).join(' ')}`,
   name: PLACES[index],
   pictures: [
     {

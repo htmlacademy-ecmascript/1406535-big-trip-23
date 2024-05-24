@@ -1,14 +1,15 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { date } from '../utils/date.js';
+import { getObjectFromArrayByKey } from '../utils/utils.js';
 
-const createOfferTemplate = ({title, price}) =>
+
+const createOfferTemplate = ({ title, price }) =>
   `<li class="event__offer"><span class="event__offer-title">${title}</span>
     &plus;&euro;&nbsp; <span class="event__offer-price">${price}</span>
   </li>`;
 
-const createEventTemplate = (event, destination, offers) => {
-  const {type, offers: offersIds, dateFrom, dateTo} = event;
-
+const createEventTemplate = (event) => {
+  const { type, offers: offersIds, typeOffers, destination, dateFrom, dateTo } = event;
   const eventDate = date.formatDay(dateFrom);
   const eventDateBrief = date.formatBriefDay(dateFrom);
   const eventStartTime = date.formatOnlyTime(dateFrom);
@@ -18,7 +19,8 @@ const createEventTemplate = (event, destination, offers) => {
   const eventDuration = date.calcAndFormatDuration(dateFrom, dateTo);
 
   const offersTemplate = offersIds.length !== 0 ?
-    offersIds.map((id) => createOfferTemplate(offers.find((element) => element.id === id))).join('\n') : '';
+    offersIds.map((id) => createOfferTemplate(getObjectFromArrayByKey(typeOffers, 'id', id))).join('') :
+    '';
 
   const FavoriteClassName = event.isFavorite ? 'event__favorite-btn--active' : '';
 
@@ -30,7 +32,7 @@ const createEventTemplate = (event, destination, offers) => {
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
 
-      <h3 class="event__title">${type} ${destination.name}</h3>
+      <h3 class="event__title">${type} ${destination}</h3>
 
       <div class="event__schedule">
         <p class="event__time">
@@ -54,24 +56,18 @@ const createEventTemplate = (event, destination, offers) => {
         </svg>
       </button>
 
-      <button class="event__rollup-btn" type="button">
-        <span class="visually-hidden">Open event</span>
-      </button>
+      <button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>
     </div>`);
 };
 
 export default class EventView extends AbstractView {
   #event = null;
-  #destination = null;
-  #offers = null;
   #onEdit = null;
   #onSelect = null;
 
-  constructor({event, destination, offers, onEdit, onSelect}) {
+  constructor({ event, onEdit, onSelect }) {
     super();
     this.#event = event;
-    this.#destination = destination;
-    this.#offers = offers;
     this.#onEdit = onEdit;
     this.#onSelect = onSelect;
 
@@ -80,7 +76,7 @@ export default class EventView extends AbstractView {
   }
 
   get template() {
-    return createEventTemplate(this.#event, this.#destination, this.#offers);
+    return createEventTemplate(this.#event);
   }
 
   #onEditButtonClick = (evt) => {

@@ -18,7 +18,7 @@ const createFiltersListTemplate = (filters, currentFilter) =>
       <div class="trip-controls__filters">
         <h2 class="visually-hidden">Filter events</h2>
         <form class="trip-filters" action="#" method="get">
-          ${filters.map((filter) => createFilterTemplate(filter, currentFilter)).join('\n')}
+          ${filters.map((filter) => createFilterTemplate(filter, currentFilter)).join('')}
           <button class="visually-hidden" type="submit">Accept filter</button>
         </form>
       </div>
@@ -29,7 +29,7 @@ export default class FiltersListView extends AbstractView {
   #currentFilter = null;
   #onChange = null;
 
-  constructor({filters, currentFilter, onChange}) {
+  constructor({ filters, currentFilter, onChange }) {
     super();
     this.#filters = filters;
     this.#currentFilter = currentFilter;

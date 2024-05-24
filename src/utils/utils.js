@@ -25,4 +25,6 @@ const createRandomIdGenerator = (min, max) => {
 
 const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
 
-export { getRandomInt, getRandomArrayElement, createRandomIdGenerator, updateItem };
+const getObjectFromArrayByKey = (arr, key, value) => arr.find((obj) => obj[key] === value);
+
+export { getRandomInt, getRandomArrayElement, createRandomIdGenerator, updateItem, getObjectFromArrayByKey };
