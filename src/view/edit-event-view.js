@@ -95,7 +95,7 @@ export default class EditEventView extends AbstractStatefulView {
     this.#onReset();
   };
 
-  #getOffersByType = (type) => getObjectFromArrayByKey(this.#offers, 'type', type)?.offers || '';
+  #getOffersByType = (type) => getObjectFromArrayByKey(this.#offers, 'type', type)?.offers || [] ;
   #getDestinationIdByName = (name) => getObjectFromArrayByKey(this.#destinations, 'name', name)?.id || '';
 
   #onEventTypeChange = (evt) => {
