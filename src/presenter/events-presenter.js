@@ -1,39 +1,25 @@
 import EventPresenter from './event-presenter.js';
 import EventsListView from '../view/events-list-view.js';
 import { render, RenderPosition } from '../framework/render.js';
-import { updateItem } from '../utils/utils.js';
+import { UserAction } from '../consts.js';
+
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
-  #events = null;
   #sort = null;
   #eventPresenters = new Map();
   #eventsListComponent = new EventsListView();
 
-  constructor({ container, model, sort }) {
+  constructor({ container, model }) {
     this.#container = container;
     this.#eventsModel = model;
-    this.#sort = sort;
 
     render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
   }
 
-  init(events) {
-    this.#events = events;
+  init(events, sort) {
+    this.#sort = sort;
     events.forEach((event) => this.#renderEvent(event));
-  }
-
-  #renderEvent(event) {
-    const eventPresenter = new EventPresenter({
-      container: this.#eventsListComponent.element,
-      model: this.#eventsModel,
-      sort: this.#sort,
-      onDataChange: this.#onDataChange,
-      onModeChange: this.#onModeChange,
-    });
-
-    eventPresenter.init(event);
-    this.#eventPresenters.set(event.id, eventPresenter);
   }
 
   clearEventsList() {
@@ -41,9 +27,34 @@ export default class EventsPresenter {
     this.#eventPresenters.clear();
   }
 
-  #onDataChange = (updatedEvent) => {
-    // Здесь будет обращение к моделе
-    this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
+  rerenderEvent(event) {
+    this.#eventPresenters.get(event.id).init(event, this.#sort);
+  }
+
+  #renderEvent(event) {
+    const eventPresenter = new EventPresenter({
+      container: this.#eventsListComponent.element,
+      model: this.#eventsModel,
+      onDataChange: this.#onViewAction,
+      onModeChange: this.#onModeChange,
+    });
+
+    eventPresenter.init(event, this.#sort);
+    this.#eventPresenters.set(event.id, eventPresenter);
+  }
+
+  #onViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_EVENT:
+        this.#eventsModel.updateEvent(updateType, update);
+        break;
+      case UserAction.ADD_EVENT:
+        this.#eventsModel.addEvent(updateType, update);
+        break;
+      case UserAction.DELETE_EVENT:
+        this.#eventsModel.deleteEvent(updateType, update);
+        break;
+    }
   };
 
   #onModeChange = () => {

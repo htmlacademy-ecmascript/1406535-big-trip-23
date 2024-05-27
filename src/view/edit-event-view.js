@@ -135,7 +135,7 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onDestinationChange = (evt) => this.updateElement({ destination: this.#getDestinationIdByName(evt.target.value) });
 
-  #onPriceChange = (evt) => this._setState({ basePrice: evt.target.value });
+  #onPriceChange = (evt) => this._setState({ basePrice: parseInt(evt.target.value, 10) });
 
   #onStartDateChange = ([userDate]) => {
     this._setState({ dateFrom: userDate });
@@ -149,7 +149,7 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onFormSubmit = (evt) => {
     evt.preventDefault();
-    this.#onSubmit();
+    this.#onSubmit(EditEventView.parseStateToEvent(this._state));
   };
 
   #onViewButtonClick = (evt) => {

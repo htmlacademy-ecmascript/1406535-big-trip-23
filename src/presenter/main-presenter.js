@@ -7,6 +7,7 @@ import MessageView from '../view/message-view.js';
 import { render, RenderPosition, replace } from '../framework/render.js';
 import { getFilters, filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { sorting, DEFAULT_SORT } from '../utils/sort.js';
+import { UpdateType } from '../consts.js';
 
 export default class MainPresenter {
   #topContainer = null;
@@ -25,6 +26,8 @@ export default class MainPresenter {
     this.#topContainer = topContainer;
     this.#bottomContainer = bottomContainer;
     this.#eventsModel = model;
+
+    this.#eventsModel.addObserver(this.#onModelEvent);
 
     this.#filter = DEFAULT_FILTER;
     this.#sort = DEFAULT_SORT;
@@ -51,8 +54,8 @@ export default class MainPresenter {
       return;
     }
 
-    this.#eventsPresenter = new EventsPresenter({ container: this.#bottomContainer, model: this.#eventsModel, sort: this.#sort });
-    this.#eventsPresenter.init(this.events);
+    this.#eventsPresenter = new EventsPresenter({ container: this.#bottomContainer, model: this.#eventsModel });
+    this.#eventsPresenter.init(this.events, this.#sort);
   }
 
   #renderFiltersComponent() {
@@ -84,8 +87,25 @@ export default class MainPresenter {
 
   #rerenderEventsList() {
     this.#eventsPresenter.clearEventsList();
-    this.#eventsPresenter.init(this.events);
+    this.#eventsPresenter.init(this.events, this.#sort);
   }
+
+  #onModelEvent = (updateType, data) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        // Перерисовываем только себя
+        this.#eventsPresenter.rerenderEvent(data);
+        break;
+      case UpdateType.MINOR:
+        this.#eventsPresenter.rerenderEvent(data);
+        // Перерисовываем себя и шапку
+        break;
+      case UpdateType.MAJOR:
+        // Перерисовываем список и шапку
+        this.#rerenderEventsList();
+        break;
+    }
+  };
 
   #onFilterChange = (changedFilter) => {
     this.#filter = changedFilter;

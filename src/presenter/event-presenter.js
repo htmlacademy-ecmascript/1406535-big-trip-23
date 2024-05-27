@@ -3,6 +3,8 @@ import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { getObjectFromArrayByKey } from '../utils/utils.js';
+import { UserAction, UpdateType } from '../consts.js';
+import { SortType } from '../utils/sort.js';
 
 const Mode = {
   VIEW: 'view',
@@ -24,10 +26,9 @@ export default class EventPresenter {
   #mode = Mode.VIEW;
   #sort = null;
 
-  constructor({ container, model, sort, onDataChange, onModeChange }) {
+  constructor({ container, model, onDataChange, onModeChange }) {
     this.#container = container;
     this.#eventsModel = model;
-    this.#sort = sort;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
     this.#destinations = this.#eventsModel.destinations;
@@ -37,8 +38,9 @@ export default class EventPresenter {
     render(this.#eventsListItemComponent, this.#container);
   }
 
-  init(event) {
+  init(event, sort) {
     this.#event = event;
+    this.#sort = sort;
 
     const prevViewEventComponent = this.#viewEventComponent;
     const prevEditEventComponent = this.#editEventComponent;
@@ -113,11 +115,26 @@ export default class EventPresenter {
   };
 
   #onSelect = () => {
-    this.#onDataChange({...this.#event, isFavorite: !this.#event.isFavorite});
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, {...this.#event, isFavorite: !this.#event.isFavorite});
   };
 
-  #onFormSubmit = () => {
-    // this.#onDataChange();
+  #onFormSubmit = (event) => {
+    const isPriceChanged = this.#event.basePrice !== event.basePrice;
+    const isDestinationChanged = this.#event.destination !== event.destination;
+    const isStartDateChanged = this.#event.dateFrom !== event.dateFrom;
+    const isEndDateChanged = this.#event.dateTo !== event.dateTo;
+    const isEventTypeChanged = this.#event.type !== event.type;
+
+    if (isEventTypeChanged & !isPriceChanged & !isDestinationChanged & !isStartDateChanged & !isEndDateChanged) {
+      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, event);
+    } else if (this.#sort === SortType.PRICE & !isPriceChanged ||
+      this.#sort === SortType.DURATION & !isStartDateChanged & !isEndDateChanged ||
+      this.#sort === SortType.DATE & !isStartDateChanged) {
+      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, event);
+    } else {
+      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MAJOR, event);
+    }
+
     this.#changeEditToView();
   };
 
