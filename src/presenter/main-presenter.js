@@ -13,13 +13,11 @@ export default class MainPresenter {
   #bottomContainer = null;
   #eventsModel = null;
   #eventsPresenter = null;
-  #initialEvents = null;
-  #events = null;
   #tripInfoPresenter = null;
-  #filter = null;
-  #filters = null;
   #sortListComponent = null;
   #messageComponent = null;
+  #filter = null;
+  #filters = null;
   #sort = null;
   #isLoadFail = false;
 
@@ -33,32 +31,28 @@ export default class MainPresenter {
   }
 
   get events() {
-    return this.#eventsModel.events;
+    const events = this.#eventsModel.events;
+    const filteredEvents = filtrate[this.#filter](events);
+    return sorting[this.#sort](filteredEvents);
   }
 
   init() {
-    this.#initialEvents = [...this.#eventsModel.events];
-    this.#filters = getFilters(this.#initialEvents);
-    this.#events = filtrate[this.#filter](this.#initialEvents);
-
-    if (this.#filter !== DEFAULT_FILTER) {
-      this.#events = filtrate[this.#filter](this.#initialEvents);
-    }
-
     this.#tripInfoPresenter = new TripInfoPresenter({ container: this.#topContainer, model: this.#eventsModel });
-    this.#tripInfoPresenter.init(this.#events);
+    this.#tripInfoPresenter.init(this.events);
 
+    this.#filters = getFilters(this.events);
     this.#renderFiltersComponent();
+
     this.#renderNewEventButtonComponent();
     this.#renderSortsComponent();
 
-    if (!this.#initialEvents.length) {
+    if (!this.events.length) {
       this.#renderEmptyListMessage();
       return;
     }
 
-    this.#eventsPresenter = new EventsPresenter({ container: this.#bottomContainer, model: this.#eventsModel });
-    this.#eventsPresenter.init(sorting[this.#sort](this.#events));
+    this.#eventsPresenter = new EventsPresenter({ container: this.#bottomContainer, model: this.#eventsModel, sort: this.#sort });
+    this.#eventsPresenter.init(this.events);
   }
 
   #renderFiltersComponent() {
@@ -90,12 +84,11 @@ export default class MainPresenter {
 
   #rerenderEventsList() {
     this.#eventsPresenter.clearEventsList();
-    this.#eventsPresenter.init(sorting[this.#sort](this.#events));
+    this.#eventsPresenter.init(this.events);
   }
 
   #onFilterChange = (changedFilter) => {
     this.#filter = changedFilter;
-    this.#events = filtrate[this.#filter](this.#initialEvents);
     this.#sort = DEFAULT_SORT;
     this.#sortListComponent.resetSort();
     this.#rerenderEventsList();

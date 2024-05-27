@@ -6,12 +6,14 @@ export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
   #events = null;
+  #sort = null;
   #eventPresenters = new Map();
   #eventsListComponent = new EventsListView();
 
-  constructor({ container, model }) {
+  constructor({ container, model, sort }) {
     this.#container = container;
     this.#eventsModel = model;
+    this.#sort = sort;
 
     render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
   }
@@ -25,6 +27,7 @@ export default class EventsPresenter {
     const eventPresenter = new EventPresenter({
       container: this.#eventsListComponent.element,
       model: this.#eventsModel,
+      sort: this.#sort,
       onDataChange: this.#onDataChange,
       onModeChange: this.#onModeChange,
     });
@@ -39,7 +42,7 @@ export default class EventsPresenter {
   }
 
   #onDataChange = (updatedEvent) => {
-    this.#events = updateItem(this.#events, updatedEvent);
+    // Здесь будет обращение к моделе
     this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
   };
 

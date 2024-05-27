@@ -22,10 +22,12 @@ export default class EventPresenter {
   #onDataChange = null;
   #onModeChange = null;
   #mode = Mode.VIEW;
+  #sort = null;
 
-  constructor({ container, model, onDataChange, onModeChange }) {
+  constructor({ container, model, sort, onDataChange, onModeChange }) {
     this.#container = container;
     this.#eventsModel = model;
+    this.#sort = sort;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
     this.#destinations = this.#eventsModel.destinations;
