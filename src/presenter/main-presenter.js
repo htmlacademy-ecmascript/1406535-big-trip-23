@@ -32,6 +32,10 @@ export default class MainPresenter {
     this.#sort = DEFAULT_SORT;
   }
 
+  get events() {
+    return this.#eventsModel.events;
+  }
+
   init() {
     this.#initialEvents = [...this.#eventsModel.events];
     this.#filters = getFilters(this.#initialEvents);

@@ -1,12 +1,13 @@
 import { createMockOffers } from '../mock/offers.js';
 import { createMockEvents } from '../mock/events.js';
 import { createMockDestinations } from '../mock/destinations.js';
+import Observable from '../framework/observable.js';
 
 const mockEvents = createMockEvents();
 const mockDestinations = createMockDestinations();
 const mockOffers = createMockOffers();
 
-export default class EventsModel {
+export default class EventsModel extends Observable {
   #events = null;
   #destinations = null;
   #offers = null;
