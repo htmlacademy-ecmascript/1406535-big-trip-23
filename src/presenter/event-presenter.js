@@ -15,8 +15,6 @@ const Mode = {
 export default class EventPresenter {
   #container = null;
   #eventsModel = null;
-  #destinations = null;
-  #offers = null;
   #event = null;
   #eventsListItemComponent = null;
   #viewEventComponent = null;
@@ -31,8 +29,6 @@ export default class EventPresenter {
     this.#eventsModel = model;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
-    this.#destinations = this.#eventsModel.destinations;
-    this.#offers = this.#eventsModel.offers;
 
     this.#eventsListItemComponent = new EventsListItemView();
     render(this.#eventsListItemComponent, this.#container);
@@ -44,19 +40,23 @@ export default class EventPresenter {
 
     const prevViewEventComponent = this.#viewEventComponent;
     const prevEditEventComponent = this.#editEventComponent;
-    const typeOffers = getObjectFromArrayByKey(this.#offers, 'type', this.#event.type).offers;
-    const destinationName = getObjectFromArrayByKey(this.#destinations, 'id', this.#event.destination).name;
 
     this.#viewEventComponent = new EventView({
-      event: { ... this.#event, destination: destinationName, typeOffers: typeOffers},
+      event: {
+        ... this.#event,
+        destination: this.#getDestinationById(this.#event.destination).name,
+        typeOffers: this.#getOffersByType(this.#event.type)
+      },
       onEdit: this.#onEdit,
       onSelect: this.#onSelect,
     });
 
     this.#editEventComponent = new EditEventView({
       event: this.#event,
-      destinations: this.#destinations,
-      offers: this.#offers,
+      destinations: this.#eventsModel.destinations,
+      getDestinationById: this.#getDestinationById,
+      getDestinationByName: this.#getDestinationByName,
+      getOffersByType: this.#getOffersByType,
       onFormSubmit: this.#onFormSubmit,
       onFormReset: this.#onFormReset,
     });
@@ -88,6 +88,10 @@ export default class EventPresenter {
     remove(this.#eventsListItemComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
+
+  #getDestinationById = (id) => this.#eventsModel.getDestinationById(id);
+  #getDestinationByName = (name) => this.#eventsModel.getDestinationByName(name);
+  #getOffersByType = (type) => this.#eventsModel.getOffersByType(type);
 
   #changeViewToEdit() {
     replace(this.#editEventComponent, this.#viewEventComponent);

@@ -28,6 +28,7 @@ export default class FiltersListView extends AbstractView {
   #filters = null;
   #currentFilter = null;
   #onChange = null;
+  #filterElements = null;
 
   constructor({ filters, currentFilter, onChange }) {
     super();
@@ -36,11 +37,22 @@ export default class FiltersListView extends AbstractView {
     this.#onChange = onChange;
 
     this.element.querySelector('form').addEventListener('change', this.#onFilterChange);
+    this.#filterElements = this.element.querySelectorAll('.trip-filters__filter-input');
   }
 
   get template() {
     return createFiltersListTemplate(this.#filters, this.#currentFilter);
   }
+
+  update(filters) {
+    this.#filterElements.forEach((input, index) => {
+      input.disabled = !filters[index].isAvailable;
+    });
+  }
+
+  // reset() {
+
+  // };
 
   #onFilterChange = (evt) => {
     this.#onChange(evt.target.id.replace(ID_PREFIX, ''));

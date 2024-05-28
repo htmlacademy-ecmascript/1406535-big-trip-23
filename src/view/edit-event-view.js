@@ -1,16 +1,14 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { createTypesListTemplate, createEventDetailsTemplate } from '../view/edit-event-template.js';
 import { date } from '../utils/date.js';
-import { getObjectFromArrayByKey } from '../utils/utils.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 const createEditEventTemplate = (event, destinations, typeOffers) => {
-  const { offers: offersIds, destination: destinationId, type, basePrice, dateFrom, dateTo } = event;
+  const { offers: offersIds, destination, type, basePrice, dateFrom, dateTo } = event;
   const eventStart = date.formatDayTime(dateFrom);
   const eventEnd = date.formatDayTime(dateTo);
   const typesListTemplate = createTypesListTemplate(type);
-  const destination = getObjectFromArrayByKey(destinations, 'id', destinationId);
   const detailsTemplate = typeOffers.length || destination ? createEventDetailsTemplate(typeOffers, offersIds, destination) : '';
 
   return (
@@ -53,22 +51,26 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
 export default class EditEventView extends AbstractStatefulView {
   #event = null;
   #destinations = [];
-  #offers = [];
   #typeOffers = [];
   #datapickerStart = null;
   #datapickerEnd = null;
   #onReset = null;
   #onSubmit = null;
+  #getDestinationById = null;
+  #getDestinationByName = null;
+  #getOffersByType = null;
 
-  constructor({ event, destinations, offers, onFormSubmit, onFormReset }) {
+  constructor({ event, destinations, getDestinationById, getDestinationByName, getOffersByType, onFormSubmit, onFormReset }) {
     super();
     this.#event = event;
     this.#destinations = destinations;
-    this.#offers = offers;
+    this.#getDestinationById = getDestinationById;
+    this.#getDestinationByName = getDestinationByName;
+    this.#getOffersByType = getOffersByType;
     this.#onReset = onFormReset;
     this.#onSubmit = onFormSubmit;
     this.#typeOffers = this.#getOffersByType(event.type);
-    this._setState(EditEventView.parseEventToState(event));
+    this._setState(EditEventView.parseEventToState(event, this.#getDestinationById(event.destination)));
     this._restoreHandlers();
   }
 
@@ -98,7 +100,7 @@ export default class EditEventView extends AbstractStatefulView {
   }
 
   reset() {
-    this.updateElement(this.#event);
+    this.updateElement({ ...this.#event, destination: this.#getDestinationById(this.#event.destination) });
   }
 
   #setDatepickers() {
@@ -125,10 +127,8 @@ export default class EditEventView extends AbstractStatefulView {
     );
   }
 
-  #getOffersByType = (type) => getObjectFromArrayByKey(this.#offers, 'type', type)?.offers || [] ;
-  #getDestinationIdByName = (name) => getObjectFromArrayByKey(this.#destinations, 'name', name)?.id || '';
 
-  #getCheckedOffers() {
+  #getCheckedOfferIds() {
     const checkedOffers = [];
     this.element.querySelectorAll('.event__offer-checkbox').forEach((offer) => offer.checked ? checkedOffers.push(offer.dataset.id) : '');
     return checkedOffers;
@@ -140,7 +140,7 @@ export default class EditEventView extends AbstractStatefulView {
     this.updateElement({ type: changedType, offers: [] });
   };
 
-  #onDestinationChange = (evt) => this.updateElement({ destination: this.#getDestinationIdByName(evt.target.value) });
+  #onDestinationChange = (evt) => this.updateElement({ destination: this.#getDestinationByName(evt.target.value) });
 
   #onPriceChange = (evt) => this._setState({ basePrice: parseInt(evt.target.value, 10) });
 
@@ -156,8 +156,8 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onFormSubmit = (evt) => {
     evt.preventDefault();
-    this._setState({ offers: this.#getCheckedOffers() });
-    this.#onSubmit(EditEventView.parseStateToEvent(this._state));
+    this._setState({ offers: this.#getCheckedOfferIds() });
+    this.#onSubmit(EditEventView.parseStateToEvent(this._state, this._state.destination.id));
   };
 
   #onViewButtonClick = (evt) => {
@@ -166,11 +166,11 @@ export default class EditEventView extends AbstractStatefulView {
     this.#onReset();
   };
 
-  static parseEventToState(event) {
-    return {...event};
+  static parseEventToState(event, destinationName) {
+    return { ...event, destination: destinationName };
   }
 
-  static parseStateToEvent(state) {
-    return {...state};
+  static parseStateToEvent(state, destinationId) {
+    return { ...state, destination: destinationId };
   }
 }

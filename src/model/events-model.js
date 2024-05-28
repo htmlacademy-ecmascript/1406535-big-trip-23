@@ -27,7 +27,9 @@ export default class EventsModel extends Observable {
 
   getDestinationNameById = (id) => getObjectFromArrayByKey(this.#destinations, 'id', id)?.name || '';
 
-  getDestinationIdByName = (name) => getObjectFromArrayByKey(this.#destinations, 'name', name)?.id || '';
+  getDestinationById = (id) => getObjectFromArrayByKey(this.#destinations, 'id', id) || '';
+
+  getDestinationByName = (name) => getObjectFromArrayByKey(this.#destinations, 'name', name) || '';
 
   getOffersByType = (type) => getObjectFromArrayByKey(this.#offers, 'type', type)?.offers || [] ;
 

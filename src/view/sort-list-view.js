@@ -36,7 +36,7 @@ export default class SortListView extends AbstractView {
     return createSortListTemplate(this.#currentSort);
   }
 
-  resetSort() {
+  reset() {
     this.#sortElements.forEach((input) => {
       input.checked = input.id === `${ID_PREFIX}${DEFAULT_SORT}`;
     });
