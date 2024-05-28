@@ -80,6 +80,7 @@ export default class EditEventView extends AbstractStatefulView {
     this.element.addEventListener('submit', this.#onFormSubmit);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onViewButtonClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeChange);
+    // Исправлю ошибку с Esc попозже
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#onPriceChange);
     this.#setDatepickers();
@@ -127,6 +128,12 @@ export default class EditEventView extends AbstractStatefulView {
   #getOffersByType = (type) => getObjectFromArrayByKey(this.#offers, 'type', type)?.offers || [] ;
   #getDestinationIdByName = (name) => getObjectFromArrayByKey(this.#destinations, 'name', name)?.id || '';
 
+  #getCheckedOffers() {
+    const checkedOffers = [];
+    this.element.querySelectorAll('.event__offer-checkbox').forEach((offer) => offer.checked ? checkedOffers.push(offer.dataset.id) : '');
+    return checkedOffers;
+  }
+
   #onEventTypeChange = (evt) => {
     const changedType = evt.target.value;
     this.#typeOffers = this.#getOffersByType(changedType);
@@ -149,6 +156,7 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onFormSubmit = (evt) => {
     evt.preventDefault();
+    this._setState({ offers: this.#getCheckedOffers() });
     this.#onSubmit(EditEventView.parseStateToEvent(this._state));
   };
 

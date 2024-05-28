@@ -2,6 +2,7 @@ import { createMockOffers } from '../mock/offers.js';
 import { createMockEvents } from '../mock/events.js';
 import { createMockDestinations } from '../mock/destinations.js';
 import Observable from '../framework/observable.js';
+import { getObjectFromArrayByKey } from '../utils/utils.js';
 
 const mockEvents = createMockEvents();
 const mockDestinations = createMockDestinations();
@@ -23,6 +24,17 @@ export default class EventsModel extends Observable {
   get events() {
     return this.#events;
   }
+
+  getDestinationNameById = (id) => getObjectFromArrayByKey(this.#destinations, 'id', id)?.name || '';
+
+  getDestinationIdByName = (name) => getObjectFromArrayByKey(this.#destinations, 'name', name)?.id || '';
+
+  getOffersByType = (type) => getObjectFromArrayByKey(this.#offers, 'type', type)?.offers || [] ;
+
+  getOfferPriceById = (type, id) => {
+    const typeOffers = this.getOffersByType(type);
+    return getObjectFromArrayByKey(typeOffers, 'id', id)?.price || '' ;
+  };
 
   updateEvent(updateType, update) {
     const index = this.#events.findIndex((event) => event.id === update.id);

@@ -124,17 +124,27 @@ export default class EventPresenter {
     const isStartDateChanged = this.#event.dateFrom !== event.dateFrom;
     const isEndDateChanged = this.#event.dateTo !== event.dateTo;
     const isEventTypeChanged = this.#event.type !== event.type;
+    const isNoMajorChanges = !isPriceChanged & !isDestinationChanged & !isStartDateChanged & !isEndDateChanged;
 
-    if (isEventTypeChanged & !isPriceChanged & !isDestinationChanged & !isStartDateChanged & !isEndDateChanged) {
+    if (isEventTypeChanged & !this.#event.offers.length & !event.offers.length & isNoMajorChanges) {
       this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, event);
-    } else if (this.#sort === SortType.PRICE & !isPriceChanged ||
-      this.#sort === SortType.DURATION & !isStartDateChanged & !isEndDateChanged ||
-      this.#sort === SortType.DATE & !isStartDateChanged) {
-      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, event);
-    } else {
-      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MAJOR, event);
+      this.#changeEditToView();
+      return;
     }
 
+    switch (this.#sort) {
+      case SortType.PRICE:
+        this.#onDataChange(UserAction.UPDATE_EVENT, isPriceChanged ? UpdateType.MAJOR : UpdateType.MINOR, event);
+        break;
+      case SortType.DURATION:
+        this.#onDataChange(UserAction.UPDATE_EVENT, isStartDateChanged || isEndDateChanged ? UpdateType.MAJOR : UpdateType.MINOR, event);
+        break;
+      case SortType.DATE:
+        this.#onDataChange(UserAction.UPDATE_EVENT, isStartDateChanged ? UpdateType.MAJOR : UpdateType.MINOR, event);
+        break;
+      default:
+        this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, event);
+    }
     this.#changeEditToView();
   };
 

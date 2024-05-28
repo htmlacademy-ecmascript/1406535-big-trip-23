@@ -16,6 +16,7 @@ export default class MainPresenter {
   #eventsPresenter = null;
   #tripInfoPresenter = null;
   #sortListComponent = null;
+  #filtersListComponent = null;
   #messageComponent = null;
   #filter = null;
   #filters = null;
@@ -41,7 +42,7 @@ export default class MainPresenter {
 
   init() {
     this.#tripInfoPresenter = new TripInfoPresenter({ container: this.#topContainer, model: this.#eventsModel });
-    this.#tripInfoPresenter.init(this.events);
+    this.#tripInfoPresenter.init();
 
     this.#filters = getFilters(this.events);
     this.#renderFiltersComponent();
@@ -59,12 +60,12 @@ export default class MainPresenter {
   }
 
   #renderFiltersComponent() {
-    const filtersComponent = new FiltersListView({
+    this.#filtersListComponent = new FiltersListView({
       filters: this.#filters,
       currentFilter: this.#filter,
       onChange: this.#onFilterChange
     });
-    render(filtersComponent, this.#topContainer, RenderPosition.BEFOREEND);
+    render(this.#filtersListComponent, this.#topContainer, RenderPosition.BEFOREEND);
   }
 
   #renderNewEventButtonComponent() {
@@ -97,8 +98,8 @@ export default class MainPresenter {
         this.#eventsPresenter.rerenderEvent(data);
         break;
       case UpdateType.MINOR:
-        this.#eventsPresenter.rerenderEvent(data);
         // Перерисовываем себя и шапку
+        this.#eventsPresenter.rerenderEvent(data);
         break;
       case UpdateType.MAJOR:
         // Перерисовываем список и шапку

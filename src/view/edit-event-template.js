@@ -47,7 +47,7 @@ const createOfferTemplate = (offer, offersIds) => {
   const checkedSign = offersIds.includes(offer.id) ? 'checked' : '';
 
   return `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}-1" type="checkbox" name="event-offer-${id}" ${checkedSign}>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}-1" type="checkbox" name="event-offer-${id}" ${checkedSign} data-id="${offer.id}">
     <label class="event__offer-label" for="event-offer-${id}-1"><span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span></label>
   </div>`;
