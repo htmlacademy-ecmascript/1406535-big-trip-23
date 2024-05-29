@@ -43,6 +43,11 @@ export default class EventsPresenter {
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
+  #deleteEvent(event) {
+    this.#eventPresenters.get(event.id).destroy();
+    this.#eventPresenters.delete(event.id);
+  }
+
   #onViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
@@ -52,6 +57,7 @@ export default class EventsPresenter {
         this.#eventsModel.addEvent(updateType, update);
         break;
       case UserAction.DELETE_EVENT:
+        this.#deleteEvent(update);
         this.#eventsModel.deleteEvent(updateType, update);
         break;
     }

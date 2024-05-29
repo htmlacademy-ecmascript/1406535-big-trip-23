@@ -18,6 +18,7 @@ export default class MainPresenter {
   #sortListComponent = null;
   #filtersListComponent = null;
   #messageComponent = null;
+  #newEventButtonComponent = null;
   #filter = null;
   #sort = null;
   #isLoadFail = false;
@@ -39,6 +40,11 @@ export default class MainPresenter {
     return sorting[this.#sort](filteredEvents);
   }
 
+  get filters() {
+    const events = this.#eventsModel.events;
+    return getFilters(events);
+  }
+
   init() {
     this.#tripInfoPresenter = new TripInfoPresenter({ container: this.#topContainer, model: this.#eventsModel });
     this.#tripInfoPresenter.init();
@@ -47,10 +53,7 @@ export default class MainPresenter {
     this.#renderNewEventButtonComponent();
     this.#renderSortsComponent();
 
-    if (!this.events.length) {
-      this.#renderEmptyListMessage();
-      return;
-    }
+    this.#checkEmptyList();
 
     this.#eventsPresenter = new EventsPresenter({ container: this.#bottomContainer, model: this.#eventsModel });
     this.#eventsPresenter.init(this.events, this.#sort);
@@ -58,7 +61,7 @@ export default class MainPresenter {
 
   #renderFiltersComponent() {
     this.#filtersListComponent = new FiltersListView({
-      filters: getFilters(this.events),
+      filters: this.filters,
       currentFilter: this.#filter,
       onChange: this.#onFilterChange
     });
@@ -66,8 +69,8 @@ export default class MainPresenter {
   }
 
   #renderNewEventButtonComponent() {
-    const newEventButton = new NewEventButtonView();
-    render(newEventButton, this.#topContainer, RenderPosition.BEFOREEND);
+    this.#newEventButtonComponent = new NewEventButtonView({ callback: this.#addNewEventClick });
+    render(this.#newEventButtonComponent, this.#topContainer, RenderPosition.BEFOREEND);
   }
 
   #renderSortsComponent() {
@@ -78,14 +81,24 @@ export default class MainPresenter {
     render(this.#sortListComponent, this.#bottomContainer, RenderPosition.AFTERBEGIN);
   }
 
-  #renderEmptyListMessage() {
-    this.#messageComponent = new MessageView({ err: this.#isLoadFail, filter: this.#filter });
-    replace(this.#messageComponent, this.#sortListComponent);
-  }
-
   #rerenderEventsList() {
+    this.#checkEmptyList();
+
+    if (this.#messageComponent) {
+      replace(this.#sortListComponent, this.#messageComponent);
+      this.#messageComponent = null;
+    }
+
     this.#eventsPresenter.clearEventsList();
     this.#eventsPresenter.init(this.events, this.#sort);
+  }
+
+  #checkEmptyList() {
+    if (this.events.length) {
+      return;
+    }
+    this.#messageComponent = new MessageView({ err: this.#isLoadFail, filter: this.#filter });
+    replace(this.#messageComponent, this.#sortListComponent);
   }
 
   #onModelEvent = (updateType, data) => {
@@ -96,13 +109,17 @@ export default class MainPresenter {
         break;
       case UpdateType.MINOR:
         // Перерисовываем себя и шапку, обновляем компонент фильтра
-        this.#eventsPresenter.rerenderEvent(data);
-        this.#filtersListComponent.update(getFilters(this.events));
+        this.#filtersListComponent.update(this.filters);
+        if (data) {
+          this.#eventsPresenter.rerenderEvent(data);
+        } else {
+          this.#checkEmptyList();
+        }
         break;
       case UpdateType.MAJOR:
         // Перерисовываем список и шапку, обновляем компонент фильтра
+        this.#filtersListComponent.update(this.filters);
         this.#rerenderEventsList();
-        this.#filtersListComponent.update(getFilters(this.events));
         break;
     }
   };
@@ -117,5 +134,15 @@ export default class MainPresenter {
   #onSortChange = (changedSort) => {
     this.#sort = changedSort;
     this.#rerenderEventsList();
+  };
+
+  #addNewEventClick = () => {
+    // Кнопка блокируется
+    // Все открытые формы закрываются без сохранения?
+    // Фильтр everything и сортировка day.
+    // Новая форма появляется первым элементом списка.
+    // Кнопки save и cancel
+    // Стоимость 0 тип точки flight
+    this.#newEventButtonComponent.lock();
   };
 }

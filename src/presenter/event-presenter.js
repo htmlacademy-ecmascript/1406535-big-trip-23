@@ -2,7 +2,6 @@ import EventsListItemView from '../view/events-list-item-view.js';
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { getObjectFromArrayByKey } from '../utils/utils.js';
 import { UserAction, UpdateType } from '../consts.js';
 import { SortType } from '../utils/sort.js';
 
@@ -44,7 +43,7 @@ export default class EventPresenter {
     this.#viewEventComponent = new EventView({
       event: {
         ... this.#event,
-        destination: this.#getDestinationById(this.#event.destination).name,
+        destination: this.#eventsModel.getDestinationNameById(this.#event.destination),
         typeOffers: this.#getOffersByType(this.#event.type)
       },
       onEdit: this.#onEdit,
@@ -53,12 +52,15 @@ export default class EventPresenter {
 
     this.#editEventComponent = new EditEventView({
       event: this.#event,
+      // здесь передаем результат выполнения
       destinations: this.#eventsModel.destinations,
+      // а здесь передаем метод из модели, можно ли напрямую передать, не создавая обертки в презентере точки, или это нарушает критерии?
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
       onFormSubmit: this.#onFormSubmit,
       onFormReset: this.#onFormReset,
+      onDelete: this.#onDelete,
     });
 
     if (prevViewEventComponent === null || prevEditEventComponent === null) {
@@ -120,6 +122,10 @@ export default class EventPresenter {
 
   #onSelect = () => {
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, {...this.#event, isFavorite: !this.#event.isFavorite});
+  };
+
+  #onDelete = () => {
+    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
   };
 
   #onFormSubmit = (event) => {

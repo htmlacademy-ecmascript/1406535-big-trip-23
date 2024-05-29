@@ -26,6 +26,7 @@ export default class TripInfoPresenter {
 
   init() {
     if (!this.events.length) {
+      remove(this.#tripHeaderComponent, this.#container);
       return;
     }
 

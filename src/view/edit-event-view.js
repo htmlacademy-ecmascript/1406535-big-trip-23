@@ -56,11 +56,12 @@ export default class EditEventView extends AbstractStatefulView {
   #datapickerEnd = null;
   #onReset = null;
   #onSubmit = null;
+  #onDelete = null;
   #getDestinationById = null;
   #getDestinationByName = null;
   #getOffersByType = null;
 
-  constructor({ event, destinations, getDestinationById, getDestinationByName, getOffersByType, onFormSubmit, onFormReset }) {
+  constructor({ event, destinations, getDestinationById, getDestinationByName, getOffersByType, onFormSubmit, onFormReset, onDelete }) {
     super();
     this.#event = event;
     this.#destinations = destinations;
@@ -69,6 +70,7 @@ export default class EditEventView extends AbstractStatefulView {
     this.#getOffersByType = getOffersByType;
     this.#onReset = onFormReset;
     this.#onSubmit = onFormSubmit;
+    this.#onDelete = onDelete;
     this.#typeOffers = this.#getOffersByType(event.type);
     this._setState(EditEventView.parseEventToState(event, this.#getDestinationById(event.destination)));
     this._restoreHandlers();
@@ -85,6 +87,7 @@ export default class EditEventView extends AbstractStatefulView {
     // Исправлю ошибку с Esc попозже
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#onPriceChange);
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeleteButtonClick);
     this.#setDatepickers();
   }
 
@@ -127,7 +130,6 @@ export default class EditEventView extends AbstractStatefulView {
     );
   }
 
-
   #getCheckedOfferIds() {
     const checkedOffers = [];
     this.element.querySelectorAll('.event__offer-checkbox').forEach((offer) => offer.checked ? checkedOffers.push(offer.dataset.id) : '');
@@ -164,6 +166,11 @@ export default class EditEventView extends AbstractStatefulView {
     evt.preventDefault();
     this.reset();
     this.#onReset();
+  };
+
+  #onDeleteButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#onDelete();
   };
 
   static parseEventToState(event, destinationName) {
