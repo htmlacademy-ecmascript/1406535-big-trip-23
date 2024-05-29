@@ -20,16 +20,17 @@ const createSortListTemplate = (currentSort) =>
 
 export default class SortListView extends AbstractView {
   #currentSort = null;
-  #onChange = null;
   #sortElements = null;
 
-  constructor({ currentSort, onChange }) {
+  constructor({ currentSort, callback }) {
     super();
     this.#currentSort = currentSort;
-    this.#onChange = onChange;
 
-    this.element.addEventListener('change', this.#onSortChange);
     this.#sortElements = this.element.querySelectorAll('.trip-sort__input');
+
+    this.element.addEventListener('change', (evt) => {
+      callback(evt.target.id.replace(ID_PREFIX, ''));
+    });
   }
 
   get template() {
@@ -41,8 +42,4 @@ export default class SortListView extends AbstractView {
       input.checked = input.id === `${ID_PREFIX}${DEFAULT_SORT}`;
     });
   }
-
-  #onSortChange = (evt) => {
-    this.#onChange(evt.target.id.replace(ID_PREFIX, ''));
-  };
 }

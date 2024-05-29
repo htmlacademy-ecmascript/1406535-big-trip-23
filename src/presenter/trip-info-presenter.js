@@ -79,6 +79,7 @@ export default class TripInfoPresenter {
 
   #getTripPrice(events) {
     let price = 0;
+
     events.forEach((event) => {
       price += this.#getEventFullPrice(event);
     });

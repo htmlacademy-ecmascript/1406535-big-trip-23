@@ -63,7 +63,7 @@ export default class MainPresenter {
     this.#filtersListComponent = new FiltersListView({
       filters: this.filters,
       currentFilter: this.#filter,
-      onChange: this.#onFilterChange
+      callback: this.#onFilterChange
     });
     render(this.#filtersListComponent, this.#topContainer, RenderPosition.BEFOREEND);
   }
@@ -76,7 +76,7 @@ export default class MainPresenter {
   #renderSortsComponent() {
     this.#sortListComponent = new SortListView({
       currentSort: this.#sort,
-      onChange: this.#onSortChange
+      callback: this.#onSortChange
     });
     render(this.#sortListComponent, this.#bottomContainer, RenderPosition.AFTERBEGIN);
   }
