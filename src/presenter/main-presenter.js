@@ -8,6 +8,7 @@ import { render, RenderPosition, replace } from '../framework/render.js';
 import { getFilters, filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { sorting, DEFAULT_SORT } from '../utils/sort.js';
 import { UpdateType } from '../consts.js';
+// import { UpdateType, Loading } from '../consts.js';
 
 export default class MainPresenter {
   #topContainer = null;
@@ -19,9 +20,9 @@ export default class MainPresenter {
   #filtersListComponent = null;
   #messageComponent = null;
   #newEventButtonComponent = null;
-  #filter = null;
-  #sort = null;
-  #isLoadFail = false;
+  #filter = DEFAULT_FILTER;
+  #sort = DEFAULT_SORT;
+  #loading = null;
 
   constructor({ topContainer, bottomContainer, model }) {
     this.#topContainer = topContainer;
@@ -29,9 +30,6 @@ export default class MainPresenter {
     this.#eventsModel = model;
 
     this.#eventsModel.addObserver(this.#onModelEvent);
-
-    this.#filter = DEFAULT_FILTER;
-    this.#sort = DEFAULT_SORT;
   }
 
   get events() {
@@ -55,7 +53,11 @@ export default class MainPresenter {
 
     this.#checkEmptyList();
 
-    this.#eventsPresenter = new EventsPresenter({ container: this.#bottomContainer, model: this.#eventsModel });
+    this.#eventsPresenter = new EventsPresenter({
+      container: this.#bottomContainer,
+      model: this.#eventsModel,
+      onDestroy: this.#onNewEventCancel
+    });
     this.#eventsPresenter.init(this.events, this.#sort);
   }
 
@@ -89,7 +91,6 @@ export default class MainPresenter {
       this.#messageComponent = null;
     }
 
-    this.#eventsPresenter.clearEventsList();
     this.#eventsPresenter.init(this.events, this.#sort);
   }
 
@@ -97,7 +98,12 @@ export default class MainPresenter {
     if (this.events.length) {
       return;
     }
-    this.#messageComponent = new MessageView({ err: this.#isLoadFail, filter: this.#filter });
+
+    if (!this.#eventsModel.events.length) {
+      this.#filter = DEFAULT_FILTER;
+    }
+
+    this.#messageComponent = new MessageView({ loading: this.#loading, filter: this.#filter });
     replace(this.#messageComponent, this.#sortListComponent);
   }
 
@@ -108,7 +114,7 @@ export default class MainPresenter {
         this.#eventsPresenter.rerenderEvent(data);
         break;
       case UpdateType.MINOR:
-        // Перерисовываем себя и шапку, обновляем компонент фильтра
+        // Перерисовываем себя и шапку (шапка перерисовывается сама за счет подписки на изменения модели), обновляем компонент фильтра
         this.#filtersListComponent.update(this.filters);
         if (data) {
           this.#eventsPresenter.rerenderEvent(data);
@@ -117,7 +123,7 @@ export default class MainPresenter {
         }
         break;
       case UpdateType.MAJOR:
-        // Перерисовываем список и шапку, обновляем компонент фильтра
+        // Перерисовываем список и шапку (шапка перерисовывается сама за счет подписки на изменения модели), обновляем компонент фильтра
         this.#filtersListComponent.update(this.filters);
         this.#rerenderEventsList();
         break;
@@ -144,5 +150,12 @@ export default class MainPresenter {
     // Кнопки save и cancel
     // Стоимость 0 тип точки flight
     this.#newEventButtonComponent.lock();
+    this.#onFilterChange(DEFAULT_FILTER);
+    this.#filtersListComponent.reset();
+    this.#eventsPresenter.addNewEvent();
+  };
+
+  #onNewEventCancel = () => {
+    this.#newEventButtonComponent.unlock();
   };
 }

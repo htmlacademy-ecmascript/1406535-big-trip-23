@@ -2,7 +2,6 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { date } from '../utils/date.js';
 import { getObjectFromArrayByKey } from '../utils/utils.js';
 
-
 const createOfferTemplate = ({ title, price }) =>
   `<li class="event__offer"><span class="event__offer-title">${title}</span>
     &plus;&euro;&nbsp; <span class="event__offer-price">${price}</span>
@@ -61,30 +60,23 @@ const createEventTemplate = (event) => {
 
 export default class EventView extends AbstractView {
   #event = null;
-  #onEdit = null;
-  #onSelect = null;
 
-  constructor({ event, onEdit, onSelect }) {
+  constructor({ event, onEdit, onFavoriteClick }) {
     super();
     this.#event = event;
-    this.#onEdit = onEdit;
-    this.#onSelect = onSelect;
 
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onEditButtonClick);
-    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#onFavoriteButtonClick);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', (evt) => {
+      evt.preventDefault();
+      onEdit();
+    });
+
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', (evt) => {
+      evt.preventDefault();
+      onFavoriteClick();
+    });
   }
 
   get template() {
     return createEventTemplate(this.#event);
   }
-
-  #onEditButtonClick = (evt) => {
-    evt.preventDefault();
-    this.#onEdit();
-  };
-
-  #onFavoriteButtonClick = (evt) => {
-    evt.preventDefault();
-    this.#onSelect();
-  };
 }

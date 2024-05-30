@@ -6,8 +6,8 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 const createEditEventTemplate = (event, destinations, typeOffers) => {
   const { offers: offersIds, destination, type, basePrice, dateFrom, dateTo } = event;
-  const eventStart = date.formatDayTime(dateFrom);
-  const eventEnd = date.formatDayTime(dateTo);
+  const eventStart = dateFrom ? date.formatDayTime(dateFrom) : '';
+  const eventEnd = dateTo ? date.formatDayTime(dateTo) : '';
   const typesListTemplate = createTypesListTemplate(type);
   const detailsTemplate = typeOffers.length || destination ? createEventDetailsTemplate(typeOffers, offersIds, destination) : '';
 
@@ -57,11 +57,13 @@ export default class EditEventView extends AbstractStatefulView {
   #onReset = null;
   #onSubmit = null;
   #onDelete = null;
+  #onCancel = null;
   #getDestinationById = null;
   #getDestinationByName = null;
   #getOffersByType = null;
+  #isNewEvent = false;
 
-  constructor({ event, destinations, getDestinationById, getDestinationByName, getOffersByType, onFormSubmit, onFormReset, onDelete }) {
+  constructor({ event, destinations, getDestinationById, getDestinationByName, getOffersByType, onFormSubmit, onFormReset, onDelete, onCancel }) {
     super();
     this.#event = event;
     this.#destinations = destinations;
@@ -72,6 +74,12 @@ export default class EditEventView extends AbstractStatefulView {
     this.#onSubmit = onFormSubmit;
     this.#onDelete = onDelete;
     this.#typeOffers = this.#getOffersByType(event.type);
+
+    if (onCancel) {
+      this.#onCancel = onCancel;
+      this.#isNewEvent = true;
+    }
+
     this._setState(EditEventView.parseEventToState(event, this.#getDestinationById(event.destination)));
     this._restoreHandlers();
   }
@@ -82,13 +90,23 @@ export default class EditEventView extends AbstractStatefulView {
 
   _restoreHandlers() {
     this.element.addEventListener('submit', this.#onFormSubmit);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onViewButtonClick);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeChange);
     // Исправлю ошибку с Esc попозже
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#onPriceChange);
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onDeleteButtonClick);
     this.#setDatepickers();
+
+    const editToViewButton = this.element.querySelector('.event__rollup-btn');
+    const eventResetButton = this.element.querySelector('.event__reset-btn');
+
+    if (this.#isNewEvent) {
+      editToViewButton.remove();
+      eventResetButton.innerText = 'Cancel';
+      eventResetButton.addEventListener('click', this.#onCancelButtonClick);
+    } else {
+      editToViewButton.addEventListener('click', this.#onViewButtonClick);
+      eventResetButton.addEventListener('click', this.#onDeleteButtonClick);
+    }
   }
 
   removeElement() {
@@ -112,7 +130,7 @@ export default class EditEventView extends AbstractStatefulView {
         dateFormat: 'd/m/y H:i',
         enableTime: true,
         'time_24hr': true,
-        defaultDate: this._state.dateFrom,
+        defaultDate: this.#isNewEvent ? false : this._state.dateFrom,
         maxDate: this._state.dateTo,
         onChange: this.#onStartDateChange,
       },
@@ -123,7 +141,7 @@ export default class EditEventView extends AbstractStatefulView {
         dateFormat: 'd/m/y H:i',
         enableTime: true,
         'time_24hr': true,
-        defaultDate: this._state.dateTo,
+        defaultDate: this.#isNewEvent ? false : this._state.dateTo,
         minDate: this._state.dateFrom,
         onChange: this.#onEndDateChange,
       },
@@ -173,8 +191,13 @@ export default class EditEventView extends AbstractStatefulView {
     this.#onDelete();
   };
 
-  static parseEventToState(event, destinationName) {
-    return { ...event, destination: destinationName };
+  #onCancelButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#onCancel();
+  };
+
+  static parseEventToState(event, destinationObj) {
+    return { ...event, destination: destinationObj };
   }
 
   static parseStateToEvent(state, destinationId) {

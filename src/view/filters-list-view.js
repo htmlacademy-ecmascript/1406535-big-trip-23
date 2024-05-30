@@ -1,4 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { DEFAULT_FILTER } from '../utils/filter.js';
 
 const ID_PREFIX = 'filter-';
 
@@ -48,6 +49,12 @@ export default class FiltersListView extends AbstractView {
   update(filters) {
     this.#filterElements.forEach((input, index) => {
       input.disabled = !filters[index].isAvailable;
+    });
+  }
+
+  reset() {
+    this.#filterElements.forEach((input) => {
+      input.checked = input.id === `${ID_PREFIX}${DEFAULT_FILTER}`;
     });
   }
 }

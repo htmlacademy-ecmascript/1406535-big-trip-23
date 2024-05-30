@@ -4,11 +4,11 @@ const PLACES = ['Moscow', 'Geneva', 'Berlin', 'London', 'Abu-Dabi', 'New York', 
 const EVENTS_NUMBER = 4;
 
 const NEW_EVENT = {
-  id: '',
+  id: null,
   basePrice: 0,
-  dateFrom: '2024-05-05T17:00:00.935Z',
-  dateTo: '2024-05-05T17:00:00.935Z',
-  destination: '',
+  dateFrom: null,
+  dateTo: null,
+  destination: null,
   isFavorite: false,
   offers: [],
   type: 'flight',
@@ -29,4 +29,9 @@ const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
-export { EVENT_TYPES, PLACES, EVENTS_NUMBER, NEW_EVENT, HOURS_IN_DAY, MINUTES_IN_HOUR, EVENT_DEFAULT_TYPE, UserAction, UpdateType };
+const Loading = {
+  ERROR: 'error',
+  IN_PROGRESS: 'progress',
+};
+
+export { EVENT_TYPES, PLACES, EVENTS_NUMBER, NEW_EVENT, HOURS_IN_DAY, MINUTES_IN_HOUR, EVENT_DEFAULT_TYPE, UserAction, UpdateType, Loading };

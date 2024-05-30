@@ -8,7 +8,6 @@ import { SortType } from '../utils/sort.js';
 const Mode = {
   VIEW: 'view',
   EDIT: 'edit',
-  NEW: 'new',
 };
 
 export default class EventPresenter {
@@ -37,8 +36,8 @@ export default class EventPresenter {
     this.#event = event;
     this.#sort = sort;
 
-    const prevViewEventComponent = this.#viewEventComponent;
-    const prevEditEventComponent = this.#editEventComponent;
+    remove(this.#viewEventComponent);
+    remove(this.#editEventComponent);
 
     this.#viewEventComponent = new EventView({
       event: {
@@ -47,7 +46,7 @@ export default class EventPresenter {
         typeOffers: this.#getOffersByType(this.#event.type)
       },
       onEdit: this.#onEdit,
-      onSelect: this.#onSelect,
+      onFavoriteClick: this.#onFavoriteClick,
     });
 
     this.#editEventComponent = new EditEventView({
@@ -63,21 +62,13 @@ export default class EventPresenter {
       onDelete: this.#onDelete,
     });
 
-    if (prevViewEventComponent === null || prevEditEventComponent === null) {
-      render(this.#viewEventComponent, this.#eventsListItemComponent.element);
-      return;
-    }
-
     if (this.#mode === Mode.VIEW) {
-      replace(this.#viewEventComponent, prevViewEventComponent);
+      render(this.#viewEventComponent, this.#eventsListItemComponent.element);
     }
 
     if (this.#mode === Mode.EDIT) {
-      replace(this.#editEventComponent, prevEditEventComponent);
+      render(this.#editEventComponent, this.#eventsListItemComponent.element);
     }
-
-    remove(prevViewEventComponent);
-    remove(prevEditEventComponent);
   }
 
   resetView() {
@@ -120,7 +111,7 @@ export default class EventPresenter {
     this.#changeViewToEdit();
   };
 
-  #onSelect = () => {
+  #onFavoriteClick = () => {
     this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, {...this.#event, isFavorite: !this.#event.isFavorite});
   };
 

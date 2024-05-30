@@ -1,4 +1,5 @@
 import EventPresenter from './event-presenter.js';
+import NewEventPresenter from './new-event-presenter.js';
 import EventsListView from '../view/events-list-view.js';
 import { render, RenderPosition } from '../framework/render.js';
 import { UserAction } from '../consts.js';
@@ -6,11 +7,12 @@ import { UserAction } from '../consts.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
-  #sort = null;
   #eventPresenters = new Map();
+  #newEventPresenter = null;
   #eventsListComponent = new EventsListView();
+  #sort = null;
 
-  constructor({ container, model }) {
+  constructor({ container, model, onDestroy }) {
     this.#container = container;
     this.#eventsModel = model;
 
@@ -18,18 +20,21 @@ export default class EventsPresenter {
   }
 
   init(events, sort) {
+    if (this.#eventPresenters.size) {
+      this.#clearEventsList();
+    }
+
     this.#sort = sort;
     events.forEach((event) => this.#renderEvent(event));
-  }
-
-  clearEventsList() {
-    this.#eventPresenters.forEach((presenter) => presenter.destroy());
-    this.#eventPresenters.clear();
   }
 
   rerenderEvent(event) {
     this.#eventPresenters.get(event.id).init(event, this.#sort);
   }
+
+  // addNewEvent() {
+  //   render(..., this.#container, RenderPosition.AFTERBEGIN);
+  // }
 
   #renderEvent(event) {
     const eventPresenter = new EventPresenter({
@@ -41,6 +46,11 @@ export default class EventsPresenter {
 
     eventPresenter.init(event, this.#sort);
     this.#eventPresenters.set(event.id, eventPresenter);
+  }
+
+  #clearEventsList() {
+    this.#eventPresenters.forEach((presenter) => presenter.destroy());
+    this.#eventPresenters.clear();
   }
 
   #deleteEvent(event) {
