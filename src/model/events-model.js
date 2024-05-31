@@ -2,7 +2,7 @@ import { createMockOffers } from '../mock/offers.js';
 import { createMockEvents } from '../mock/events.js';
 import { createMockDestinations } from '../mock/destinations.js';
 import Observable from '../framework/observable.js';
-import { getObjectFromArrayByKey } from '../utils/utils.js';
+import { getObjectFromArrayByKey, getRandomInt } from '../utils/utils.js';
 
 const mockEvents = createMockEvents();
 const mockDestinations = createMockDestinations();
@@ -50,7 +50,8 @@ export default class EventsModel extends Observable {
   }
 
   addEvent(updateType, update) {
-    this.#events = [update, ...this.#events];
+    const randomId = `dummy_id${getRandomInt(0, 1000)}`;
+    this.#events = [{...update, id: randomId}, ...this.#events];
     this._notify(updateType, update);
   }
 

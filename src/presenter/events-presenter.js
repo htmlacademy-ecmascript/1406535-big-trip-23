@@ -10,13 +10,22 @@ export default class EventsPresenter {
   #eventPresenters = new Map();
   #newEventPresenter = null;
   #eventsListComponent = new EventsListView();
+  #onNewEventCancel = null;
   #sort = null;
 
-  constructor({ container, model, onDestroy }) {
+  constructor({ container, model, onNewEventCancel }) {
     this.#container = container;
     this.#eventsModel = model;
+    this.#onNewEventCancel = onNewEventCancel;
 
     render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
+
+    this.#newEventPresenter = new NewEventPresenter({
+      container: this.#eventsListComponent.element,
+      model: this.#eventsModel,
+      onDataChange: this.#onViewAction,
+      onDestroy: this.#onNewFormDestroy,
+    });
   }
 
   init(events, sort) {
@@ -32,9 +41,9 @@ export default class EventsPresenter {
     this.#eventPresenters.get(event.id).init(event, this.#sort);
   }
 
-  // addNewEvent() {
-  //   render(..., this.#container, RenderPosition.AFTERBEGIN);
-  // }
+  addNewEvent() {
+    this.#newEventPresenter.init();
+  }
 
   #renderEvent(event) {
     const eventPresenter = new EventPresenter({
@@ -65,6 +74,8 @@ export default class EventsPresenter {
         break;
       case UserAction.ADD_EVENT:
         this.#eventsModel.addEvent(updateType, update);
+        this.#newEventPresenter.destroy();
+        this.#onNewEventCancel();
         break;
       case UserAction.DELETE_EVENT:
         this.#deleteEvent(update);
@@ -74,6 +85,12 @@ export default class EventsPresenter {
   };
 
   #onModeChange = () => {
+    this.#onNewFormDestroy();
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #onNewFormDestroy = () => {
+    this.#newEventPresenter.destroy();
+    this.#onNewEventCancel();
   };
 }

@@ -1,13 +1,11 @@
-import EventsListItemView from '../view/events-list-item-view.js';
 import EditEventView from '../view/edit-event-view.js';
-import { render, remove } from '../framework/render.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType, NEW_EVENT } from '../consts.js';
 
 export default class NewEventPresenter {
   #container = null;
   #eventsModel = null;
   #event = NEW_EVENT;
-  #eventsListItemComponent = null;
   #editEventComponent = null;
   #onDataChange = null;
   #onDestroy = null;
@@ -17,9 +15,6 @@ export default class NewEventPresenter {
     this.#eventsModel = model;
     this.#onDataChange = onDataChange;
     this.#onDestroy = onDestroy;
-
-    this.#eventsListItemComponent = new EventsListItemView();
-    render(this.#eventsListItemComponent, this.#container);
   }
 
   init() {
@@ -35,15 +30,13 @@ export default class NewEventPresenter {
       onCancel: this.#onCancel,
     });
 
-    render(this.#editEventComponent, this.#eventsListItemComponent.element);
+    render(this.#editEventComponent, this.#container, RenderPosition.AFTERBEGIN);
     document.addEventListener('keydown', this.#onEscKeydown);
   }
 
-
   destroy() {
-    remove(this.#eventsListItemComponent);
+    remove(this.#editEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
-    this.#onDestroy();
   }
 
   #getDestinationById = (id) => this.#eventsModel.getDestinationById(id);
@@ -53,12 +46,12 @@ export default class NewEventPresenter {
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.destroy();
+      this.#onDestroy();
     }
   };
 
   #onCancel = () => {
-    this.destroy();
+    this.#onDestroy();
   };
 
   #onFormSubmit = (event) => {

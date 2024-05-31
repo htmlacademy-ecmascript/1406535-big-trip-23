@@ -1,4 +1,3 @@
-import EventsListItemView from '../view/events-list-item-view.js';
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import { render, replace, remove } from '../framework/render.js';
@@ -14,7 +13,6 @@ export default class EventPresenter {
   #container = null;
   #eventsModel = null;
   #event = null;
-  #eventsListItemComponent = null;
   #viewEventComponent = null;
   #editEventComponent = null;
   #onDataChange = null;
@@ -27,17 +25,14 @@ export default class EventPresenter {
     this.#eventsModel = model;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
-
-    this.#eventsListItemComponent = new EventsListItemView();
-    render(this.#eventsListItemComponent, this.#container);
   }
 
   init(event, sort) {
     this.#event = event;
     this.#sort = sort;
 
-    remove(this.#viewEventComponent);
-    remove(this.#editEventComponent);
+    const prevViewEventComponent = this.#viewEventComponent;
+    const prevEditEventComponent = this.#editEventComponent;
 
     this.#viewEventComponent = new EventView({
       event: {
@@ -62,23 +57,33 @@ export default class EventPresenter {
       onDelete: this.#onDelete,
     });
 
+    if (prevViewEventComponent === null || prevEditEventComponent === null) {
+      render(this.#viewEventComponent, this.#container);
+      return;
+    }
+
     if (this.#mode === Mode.VIEW) {
-      render(this.#viewEventComponent, this.#eventsListItemComponent.element);
+      replace(this.#viewEventComponent, prevViewEventComponent);
     }
 
     if (this.#mode === Mode.EDIT) {
-      render(this.#editEventComponent, this.#eventsListItemComponent.element);
+      replace(this.#editEventComponent, prevEditEventComponent);
     }
+
+    remove(prevEditEventComponent);
+    remove(prevViewEventComponent);
   }
 
   resetView() {
     if (this.#mode !== Mode.VIEW) {
+      this.#editEventComponent.reset(this.#event);
       this.#changeEditToView();
     }
   }
 
   destroy() {
-    remove(this.#eventsListItemComponent);
+    remove(this.#viewEventComponent);
+    remove(this.#editEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
@@ -102,7 +107,6 @@ export default class EventPresenter {
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#editEventComponent.reset();
       this.#changeEditToView();
     }
   };

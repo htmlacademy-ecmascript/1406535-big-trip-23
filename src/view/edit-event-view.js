@@ -12,7 +12,8 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
   const detailsTemplate = typeOffers.length || destination ? createEventDetailsTemplate(typeOffers, offersIds, destination) : '';
 
   return (
-    `<form class="event event--edit" action="#" method="post">
+    `<li class="trip-events__item">
+      <form class="event event--edit" action="#" method="post">
         <header class="event__header">
 
           ${typesListTemplate}
@@ -45,7 +46,8 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
 
         ${detailsTemplate}
 
-      </form>`);
+       </form>
+    </li>`);
 };
 
 export default class EditEventView extends AbstractStatefulView {

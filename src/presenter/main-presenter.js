@@ -56,7 +56,7 @@ export default class MainPresenter {
     this.#eventsPresenter = new EventsPresenter({
       container: this.#bottomContainer,
       model: this.#eventsModel,
-      onDestroy: this.#onNewEventCancel
+      onNewEventCancel: this.#onNewEventCancel
     });
     this.#eventsPresenter.init(this.events, this.#sort);
   }
@@ -96,6 +96,7 @@ export default class MainPresenter {
 
   #checkEmptyList() {
     if (this.events.length) {
+      this.#messageComponent = null;
       return;
     }
 
@@ -150,12 +151,21 @@ export default class MainPresenter {
     // Кнопки save и cancel
     // Стоимость 0 тип точки flight
     this.#newEventButtonComponent.lock();
-    this.#onFilterChange(DEFAULT_FILTER);
-    this.#filtersListComponent.reset();
+
+    if (!this.#eventsModel.events.length) {
+      replace(this.#sortListComponent, this.#messageComponent);
+    } else {
+      this.#onFilterChange(DEFAULT_FILTER);
+      this.#filtersListComponent.reset();
+    }
+
     this.#eventsPresenter.addNewEvent();
   };
 
   #onNewEventCancel = () => {
     this.#newEventButtonComponent.unlock();
+    if (!this.#eventsModel.events.length) {
+      replace(this.#messageComponent, this.#sortListComponent);
+    }
   };
 }
