@@ -143,14 +143,20 @@ export default class MainPresenter {
     this.#rerenderEventsList();
   };
 
+  #blockInteractiveElements() {
+    this.#newEventButtonComponent.block();
+    this.#filtersListComponent.block();
+    this.#sortListComponent.block();
+  }
+
+  #unblockInteractiveElements() {
+    this.#newEventButtonComponent.unblock();
+    this.#filtersListComponent.update(this.filters);
+    this.#sortListComponent.unblock();
+  }
+
   #addNewEventClick = () => {
-    // Кнопка блокируется
-    // Все открытые формы закрываются без сохранения?
-    // Фильтр everything и сортировка day.
-    // Новая форма появляется первым элементом списка.
-    // Кнопки save и cancel
-    // Стоимость 0 тип точки flight
-    this.#newEventButtonComponent.lock();
+    this.#blockInteractiveElements();
 
     if (!this.#eventsModel.events.length) {
       replace(this.#sortListComponent, this.#messageComponent);
@@ -163,7 +169,7 @@ export default class MainPresenter {
   };
 
   #onNewEventCancel = () => {
-    this.#newEventButtonComponent.unlock();
+    this.#unblockInteractiveElements();
     if (!this.#eventsModel.events.length) {
       replace(this.#messageComponent, this.#sortListComponent);
     }

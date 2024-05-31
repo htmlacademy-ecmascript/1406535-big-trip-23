@@ -42,4 +42,16 @@ export default class SortListView extends AbstractView {
       input.checked = input.id === `${ID_PREFIX}${DEFAULT_SORT}`;
     });
   }
+
+  block() {
+    this.#sortElements.forEach((input) => {
+      input.disabled = true;
+    });
+  }
+
+  unblock() {
+    this.#sortElements.forEach((input) => {
+      input.disabled = DISABLED_SORTS.includes(input.id.replace(ID_PREFIX, ''));
+    });
+  }
 }
