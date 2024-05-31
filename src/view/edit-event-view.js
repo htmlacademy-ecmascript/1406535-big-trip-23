@@ -3,6 +3,7 @@ import { createTypesListTemplate, createEventDetailsTemplate } from '../view/edi
 import { date } from '../utils/date.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import he from 'he';
 
 const createEditEventTemplate = (event, destinations, typeOffers) => {
   const { offers: offersIds, destination, type, basePrice, dateFrom, dateTo } = event;
@@ -10,6 +11,7 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
   const eventEnd = dateTo ? date.formatDayTime(dateTo) : '';
   const typesListTemplate = createTypesListTemplate(type);
   const detailsTemplate = typeOffers.length || destination ? createEventDetailsTemplate(typeOffers, offersIds, destination) : '';
+  const destinationName = destination?.name || '';
 
   return (
     `<li class="trip-events__item">
@@ -21,7 +23,7 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
           <div class="event__field-group  event__field-group--destination">
             <label class="event__label  event__type-output" for="event-destination-1">${type}</label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text"
-            name="event-destination" value="${destination?.name || ''}" list="destination-list-1">
+            name="event-destination" value="${he.encode(destinationName)}" list="destination-list-1">
             <datalist id="destination-list-1">
               ${destinations.map((element) => `<option value="${element.name}"></option>`).join('')}
             </datalist>
