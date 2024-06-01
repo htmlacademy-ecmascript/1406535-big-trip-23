@@ -4,6 +4,8 @@ import { filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { sorting, DEFAULT_SORT } from '../utils/sort.js';
 import { UpdateType } from '../consts.js';
 
+const SHOWN_POINTS = 3;
+
 export default class TripInfoPresenter {
   #container = null;
   #eventsModel = null;
@@ -56,34 +58,23 @@ export default class TripInfoPresenter {
   }
 
   #getTripWay() {
-    const way = [];
+    const wayPoints = [];
 
-    if (this.events.length > 3) {
-      way.push(this.#eventsModel.getDestinationNameById(this.#firstEvent.destination), '...', this.#eventsModel.getDestinationNameById(this.#lastEvent.destination));
+    if (this.events.length > SHOWN_POINTS) {
+      wayPoints.push(this.#eventsModel.getDestinationNameById(this.#firstEvent.destination),
+        '...', this.#eventsModel.getDestinationNameById(this.#lastEvent.destination));
     } else {
-      this.events.forEach((event) => way.push(this.#eventsModel.getDestinationNameById(event.destination)));
+      this.events.forEach((event) => wayPoints.push(this.#eventsModel.getDestinationNameById(event.destination)));
     }
-    return way.join(' — ');
+    return wayPoints.join(' — ');
   }
 
   #getEventFullPrice(event) {
-    let price = event.basePrice;
-
-    if (event.offers.length) {
-      event.offers.forEach((offerId) => {
-        price += this.#eventsModel.getOfferPriceById(event.type, offerId);
-      });
-    }
-    return price;
+    return event.offers.reduce((sum, offerId) => sum + this.#eventsModel.getOfferPriceById(event.type, offerId), event.basePrice);
   }
 
   #getTripPrice(events) {
-    let price = 0;
-
-    events.forEach((event) => {
-      price += this.#getEventFullPrice(event);
-    });
-    return price;
+    return events.reduce((sum, event) => sum + this.#getEventFullPrice(event), 0);
   }
 
   #onModelEvent = (updateType) => {

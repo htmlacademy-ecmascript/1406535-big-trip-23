@@ -1,5 +1,4 @@
 import EventsPresenter from './events-presenter.js';
-import TripInfoPresenter from './trip-info-presenter.js';
 import FiltersListView from '../view/filters-list-view.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
 import SortListView from '../view/sort-list-view.js';
@@ -15,7 +14,6 @@ export default class MainPresenter {
   #bottomContainer = null;
   #eventsModel = null;
   #eventsPresenter = null;
-  #tripInfoPresenter = null;
   #sortListComponent = null;
   #filtersListComponent = null;
   #messageComponent = null;
@@ -44,9 +42,6 @@ export default class MainPresenter {
   }
 
   init() {
-    this.#tripInfoPresenter = new TripInfoPresenter({ container: this.#topContainer, model: this.#eventsModel });
-    this.#tripInfoPresenter.init();
-
     this.#renderFiltersComponent();
     this.#renderNewEventButtonComponent();
     this.#renderSortsComponent();
@@ -143,20 +138,8 @@ export default class MainPresenter {
     this.#rerenderEventsList();
   };
 
-  #blockInteractiveElements() {
-    this.#newEventButtonComponent.block();
-    this.#filtersListComponent.block();
-    this.#sortListComponent.block();
-  }
-
-  #unblockInteractiveElements() {
-    this.#newEventButtonComponent.unblock();
-    this.#filtersListComponent.update(this.filters);
-    this.#sortListComponent.unblock();
-  }
-
   #addNewEventClick = () => {
-    this.#blockInteractiveElements();
+    this.#newEventButtonComponent.block();
 
     if (!this.#eventsModel.events.length) {
       replace(this.#sortListComponent, this.#messageComponent);
@@ -169,7 +152,8 @@ export default class MainPresenter {
   };
 
   #onNewEventCancel = () => {
-    this.#unblockInteractiveElements();
+    this.#sortListComponent.unblock();
+
     if (!this.#eventsModel.events.length) {
       replace(this.#messageComponent, this.#sortListComponent);
     }
