@@ -134,7 +134,7 @@ export default class EditEventView extends AbstractStatefulView {
         dateFormat: 'd/m/y H:i',
         enableTime: true,
         'time_24hr': true,
-        defaultDate: this.#isNewEvent ? false : this._state.dateFrom,
+        defaultDate: this._state.dateFrom,
         maxDate: this._state.dateTo,
         onChange: this.#onStartDateChange,
       },
@@ -145,7 +145,7 @@ export default class EditEventView extends AbstractStatefulView {
         dateFormat: 'd/m/y H:i',
         enableTime: true,
         'time_24hr': true,
-        defaultDate: this.#isNewEvent ? false : this._state.dateTo,
+        defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom,
         onChange: this.#onEndDateChange,
       },
@@ -154,7 +154,7 @@ export default class EditEventView extends AbstractStatefulView {
 
   #getCheckedOfferIds() {
     const checkedOffers = [];
-    this.element.querySelectorAll('.event__offer-checkbox').forEach((offer) => offer.checked ? checkedOffers.push(offer.dataset.id) : '');
+    this.element.querySelectorAll('.event__offer-checkbox:checked').forEach((offer) => checkedOffers.push(offer.dataset.id));
     return checkedOffers;
   }
 
@@ -200,11 +200,11 @@ export default class EditEventView extends AbstractStatefulView {
     this.#onCancel();
   };
 
-  static parseEventToState(event, destinationObj) {
-    return { ...event, destination: destinationObj };
+  static parseEventToState(event, destination) {
+    return { ...event, destination };
   }
 
-  static parseStateToEvent(state, destinationId) {
-    return { ...state, destination: destinationId };
+  static parseStateToEvent(state, destination) {
+    return { ...state, destination };
   }
 }
