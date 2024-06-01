@@ -57,10 +57,4 @@ export default class FiltersListView extends AbstractView {
       input.checked = input.id === `${ID_PREFIX}${DEFAULT_FILTER}`;
     });
   }
-
-  block() {
-    this.#filterElements.forEach((input) => {
-      input.disabled = true;
-    });
-  }
 }

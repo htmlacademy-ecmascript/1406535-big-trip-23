@@ -51,7 +51,7 @@ export default class MainPresenter {
     this.#eventsPresenter = new EventsPresenter({
       container: this.#bottomContainer,
       model: this.#eventsModel,
-      onNewEventCancel: this.#onNewEventCancel
+      onDestroy: this.#onNewEventDestroy
     });
     this.#eventsPresenter.init(this.events, this.#sort);
   }
@@ -151,8 +151,8 @@ export default class MainPresenter {
     this.#eventsPresenter.addNewEvent();
   };
 
-  #onNewEventCancel = () => {
-    this.#sortListComponent.unblock();
+  #onNewEventDestroy = () => {
+    this.#newEventButtonComponent.unblock();
 
     if (!this.#eventsModel.events.length) {
       replace(this.#messageComponent, this.#sortListComponent);

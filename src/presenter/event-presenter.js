@@ -18,26 +18,32 @@ export default class EventPresenter {
   #onDataChange = null;
   #onModeChange = null;
   #mode = Mode.VIEW;
-  #sort = null;
+  #getDestinationById = null;
+  #getDestinationByName = null;
+  #getOffersByType = null;
 
-  constructor({ container, model, onDataChange, onModeChange }) {
+  constructor({ container, model, onDataChange, onModeChange, getDestinationById, getDestinationByName, getOffersByType }) {
     this.#container = container;
     this.#eventsModel = model;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
+    this.#getDestinationById = getDestinationById;
+    this.#getDestinationByName = getDestinationByName;
+    this.#getOffersByType = getOffersByType;
   }
 
-  init(event, sort) {
+  init(event) {
     this.#event = event;
-    this.#sort = sort;
 
+    const destinations = this.#eventsModel.destinations;
+    const destination = this.#eventsModel.getDestinationNameById(this.#event.destination);
     const prevViewEventComponent = this.#viewEventComponent;
     const prevEditEventComponent = this.#editEventComponent;
 
     this.#viewEventComponent = new EventView({
       event: {
         ... this.#event,
-        destination: this.#eventsModel.getDestinationNameById(this.#event.destination),
+        destination,
         typeOffers: this.#getOffersByType(this.#event.type)
       },
       onEdit: this.#onEdit,
@@ -46,9 +52,7 @@ export default class EventPresenter {
 
     this.#editEventComponent = new EditEventView({
       event: this.#event,
-      // здесь передаем результат выполнения
-      destinations: this.#eventsModel.destinations,
-      // а здесь передаем метод из модели, можно ли напрямую передать, не создавая обертки в презентере точки, или это нарушает критерии?
+      destinations,
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
@@ -87,10 +91,6 @@ export default class EventPresenter {
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
-  #getDestinationById = (id) => this.#eventsModel.getDestinationById(id);
-  #getDestinationByName = (name) => this.#eventsModel.getDestinationByName(name);
-  #getOffersByType = (type) => this.#eventsModel.getOffersByType(type);
-
   #changeViewToEdit() {
     replace(this.#editEventComponent, this.#viewEventComponent);
     document.addEventListener('keydown', this.#onEscKeydown);
@@ -99,6 +99,7 @@ export default class EventPresenter {
   }
 
   #changeEditToView() {
+    this.#editEventComponent.reset();
     replace(this.#viewEventComponent, this.#editEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
     this.#mode = Mode.VIEW;
@@ -124,32 +125,13 @@ export default class EventPresenter {
   };
 
   #onFormSubmit = (event) => {
-    const isPriceChanged = this.#event.basePrice !== event.basePrice;
-    const isDestinationChanged = this.#event.destination !== event.destination;
-    const isStartDateChanged = this.#event.dateFrom !== event.dateFrom;
-    const isEndDateChanged = this.#event.dateTo !== event.dateTo;
-    const isEventTypeChanged = this.#event.type !== event.type;
-    const isNoMajorChanges = !isPriceChanged & !isDestinationChanged & !isStartDateChanged & !isEndDateChanged;
+    const changedOptions = {
+      [SortType.DATE]: this.#event.dateFrom !== event.dateFrom,
+      [SortType.DURATION]: this.#event.dateFrom !== event.dateFrom || this.#event.dateTo !== event.dateTo,
+      [SortType.PRICE]: this.#event.basePrice !== event.basePrice,
+    };
 
-    if (isEventTypeChanged & !this.#event.offers.length & !event.offers.length & isNoMajorChanges) {
-      this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, event);
-      this.#changeEditToView();
-      return;
-    }
-
-    switch (this.#sort) {
-      case SortType.PRICE:
-        this.#onDataChange(UserAction.UPDATE_EVENT, isPriceChanged ? UpdateType.MAJOR : UpdateType.MINOR, event);
-        break;
-      case SortType.DURATION:
-        this.#onDataChange(UserAction.UPDATE_EVENT, isStartDateChanged || isEndDateChanged ? UpdateType.MAJOR : UpdateType.MINOR, event);
-        break;
-      case SortType.DATE:
-        this.#onDataChange(UserAction.UPDATE_EVENT, isStartDateChanged ? UpdateType.MAJOR : UpdateType.MINOR, event);
-        break;
-      default:
-        this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, event);
-    }
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, event, changedOptions);
     this.#changeEditToView();
   };
 

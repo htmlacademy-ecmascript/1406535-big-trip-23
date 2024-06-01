@@ -2,7 +2,7 @@ import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import EventsListView from '../view/events-list-view.js';
 import { render, RenderPosition } from '../framework/render.js';
-import { UserAction } from '../consts.js';
+import { UpdateType, UserAction } from '../consts.js';
 
 export default class EventsPresenter {
   #container = null;
@@ -10,13 +10,13 @@ export default class EventsPresenter {
   #eventPresenters = new Map();
   #newEventPresenter = null;
   #eventsListComponent = new EventsListView();
-  #onNewEventCancel = null;
+  #onDestroy = null;
   #sort = null;
 
-  constructor({ container, model, onNewEventCancel }) {
+  constructor({ container, model, onDestroy }) {
     this.#container = container;
     this.#eventsModel = model;
-    this.#onNewEventCancel = onNewEventCancel;
+    this.#onDestroy = onDestroy;
 
     render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
 
@@ -24,7 +24,10 @@ export default class EventsPresenter {
       container: this.#eventsListComponent.element,
       model: this.#eventsModel,
       onDataChange: this.#onViewAction,
-      onDestroy: this.#onNewFormDestroy,
+      onDestroy: this.#onNewEventDestroy,
+      getDestinationById: this.#getDestinationById,
+      getDestinationByName: this.#getDestinationByName,
+      getOffersByType: this.#getOffersByType,
     });
   }
 
@@ -38,7 +41,7 @@ export default class EventsPresenter {
   }
 
   rerenderEvent(event) {
-    this.#eventPresenters.get(event.id).init(event, this.#sort);
+    this.#eventPresenters.get(event.id).init(event);
   }
 
   addNewEvent() {
@@ -51,9 +54,12 @@ export default class EventsPresenter {
       model: this.#eventsModel,
       onDataChange: this.#onViewAction,
       onModeChange: this.#onModeChange,
+      getDestinationById: this.#getDestinationById,
+      getDestinationByName: this.#getDestinationByName,
+      getOffersByType: this.#getOffersByType,
     });
 
-    eventPresenter.init(event, this.#sort);
+    eventPresenter.init(event);
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
@@ -67,15 +73,21 @@ export default class EventsPresenter {
     this.#eventPresenters.delete(event.id);
   }
 
-  #onViewAction = (actionType, updateType, update) => {
+  #getDestinationById = (id) => this.#eventsModel.getDestinationById(id);
+  #getDestinationByName = (name) => this.#eventsModel.getDestinationByName(name);
+  #getOffersByType = (type) => this.#eventsModel.getOffersByType(type);
+
+  #onViewAction = (actionType, updateType, update, changedOptions) => {
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
+        if (changedOptions[this.#sort]) {
+          updateType = UpdateType.MAJOR;
+        }
         this.#eventsModel.updateEvent(updateType, update);
         break;
       case UserAction.ADD_EVENT:
+        this.#onNewEventDestroy();
         this.#eventsModel.addEvent(updateType, update);
-        this.#newEventPresenter.destroy();
-        this.#onNewEventCancel();
         break;
       case UserAction.DELETE_EVENT:
         this.#deleteEvent(update);
@@ -85,12 +97,12 @@ export default class EventsPresenter {
   };
 
   #onModeChange = () => {
-    this.#onNewFormDestroy();
+    this.#onNewEventDestroy();
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #onNewFormDestroy = () => {
+  #onNewEventDestroy = () => {
     this.#newEventPresenter.destroy();
-    this.#onNewEventCancel();
+    this.#onDestroy();
   };
 }

@@ -9,20 +9,26 @@ export default class NewEventPresenter {
   #editEventComponent = null;
   #onDataChange = null;
   #onDestroy = null;
+  #getDestinationById = null;
+  #getDestinationByName = null;
+  #getOffersByType = null;
 
-  constructor({ container, model, onDataChange, onDestroy }) {
+  constructor({ container, model, onDataChange, onDestroy, getDestinationById, getDestinationByName, getOffersByType }) {
     this.#container = container;
     this.#eventsModel = model;
     this.#onDataChange = onDataChange;
     this.#onDestroy = onDestroy;
+    this.#getDestinationById = getDestinationById;
+    this.#getDestinationByName = getDestinationByName;
+    this.#getOffersByType = getOffersByType;
   }
 
   init() {
+    const destinations = this.#eventsModel.destinations;
+
     this.#editEventComponent = new EditEventView({
       event: this.#event,
-      // здесь передаем результат выполнения
-      destinations: this.#eventsModel.destinations,
-      // а здесь передаем метод из модели, можно ли напрямую передать, не создавая обертки в презентере точки, или это нарушает критерии?
+      destinations,
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
@@ -38,10 +44,6 @@ export default class NewEventPresenter {
     remove(this.#editEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
-
-  #getDestinationById = (id) => this.#eventsModel.getDestinationById(id);
-  #getDestinationByName = (name) => this.#eventsModel.getDestinationByName(name);
-  #getOffersByType = (type) => this.#eventsModel.getOffersByType(type);
 
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
