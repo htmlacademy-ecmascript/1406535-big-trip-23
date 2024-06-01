@@ -28,6 +28,16 @@ export default class MainPresenter {
     this.#eventsModel = model;
 
     this.#eventsModel.addObserver(this.#onModelEvent);
+
+    this.#renderFiltersComponent();
+    this.#renderNewEventButtonComponent();
+    this.#renderSortsComponent();
+
+    this.#eventsPresenter = new EventsPresenter({
+      container: this.#bottomContainer,
+      model: this.#eventsModel,
+      onDestroy: this.#onNewEventDestroy
+    });
   }
 
   get events() {
@@ -42,17 +52,20 @@ export default class MainPresenter {
   }
 
   init() {
-    this.#renderFiltersComponent();
-    this.#renderNewEventButtonComponent();
-    this.#renderSortsComponent();
+    if (!this.#eventsModel.events.length) {
+      this.#filter = DEFAULT_FILTER;
+      this.#filtersListComponent.update(this.filters);
+    }
 
-    this.#checkEmptyList();
+    if (!this.events.length) {
+      this.#renderMessage();
+      return;
+    }
 
-    this.#eventsPresenter = new EventsPresenter({
-      container: this.#bottomContainer,
-      model: this.#eventsModel,
-      onDestroy: this.#onNewEventDestroy
-    });
+    if (this.#messageComponent) {
+      this.#removeMessage();
+    }
+
     this.#eventsPresenter.init(this.events, this.#sort);
   }
 
@@ -71,57 +84,54 @@ export default class MainPresenter {
   }
 
   #renderSortsComponent() {
-    this.#sortListComponent = new SortListView({
-      currentSort: this.#sort,
-      callback: this.#onSortChange
-    });
+    this.#sortListComponent = new SortListView({ currentSort: this.#sort, callback: this.#onSortChange });
     render(this.#sortListComponent, this.#bottomContainer, RenderPosition.AFTERBEGIN);
   }
 
-  #rerenderEventsList() {
-    this.#checkEmptyList();
-
-    if (this.#messageComponent) {
-      replace(this.#sortListComponent, this.#messageComponent);
-      this.#messageComponent = null;
-    }
-
-    this.#eventsPresenter.init(this.events, this.#sort);
-  }
-
-  #checkEmptyList() {
-    if (this.events.length) {
-      this.#messageComponent = null;
-      return;
-    }
-
-    if (!this.#eventsModel.events.length) {
-      this.#filter = DEFAULT_FILTER;
-    }
-
+  #renderMessage() {
     this.#messageComponent = new MessageView({ loading: this.#loading, filter: this.#filter });
     replace(this.#messageComponent, this.#sortListComponent);
   }
 
+  // Это тоже не совсем удаление...
+  #removeMessage() {
+    replace(this.#sortListComponent, this.#messageComponent);
+    this.#messageComponent = null;
+  }
+
+  // Как это можно назвать? Это нужно если текущий фильтр отличается от дефолтного, но мы грохнули все эвенты.
+  // #something() {
+  //   if (this.#eventsModel.events.length) {
+  //     return;
+  //   }
+
+  //   this.#filter = DEFAULT_FILTER;
+  //   this.#filtersListComponent.update(this.filters);
+  // }
+
   #onModelEvent = (updateType, data) => {
+    if (!data & !this.events.length) {
+      if (!this.#eventsModel.events.length) {
+        this.#filter = DEFAULT_FILTER;
+        this.#filtersListComponent.update(this.filters);
+      }
+      this.#renderMessage();
+      return;
+    }
+
     switch (updateType) {
       case UpdateType.PATCH:
-        // Перерисовываем только себя
         this.#eventsPresenter.rerenderEvent(data);
         break;
       case UpdateType.MINOR:
-        // Перерисовываем себя и шапку (шапка перерисовывается сама за счет подписки на изменения модели), обновляем компонент фильтра
         this.#filtersListComponent.update(this.filters);
         if (data) {
           this.#eventsPresenter.rerenderEvent(data);
-        } else {
-          this.#checkEmptyList();
         }
         break;
       case UpdateType.MAJOR:
-        // Перерисовываем список и шапку (шапка перерисовывается сама за счет подписки на изменения модели), обновляем компонент фильтра
         this.#filtersListComponent.update(this.filters);
-        this.#rerenderEventsList();
+        this.init();
         break;
     }
   };
@@ -130,12 +140,12 @@ export default class MainPresenter {
     this.#filter = changedFilter;
     this.#sort = DEFAULT_SORT;
     this.#sortListComponent.reset();
-    this.#rerenderEventsList();
+    this.init();
   };
 
   #onSortChange = (changedSort) => {
     this.#sort = changedSort;
-    this.#rerenderEventsList();
+    this.init();
   };
 
   #addNewEventClick = () => {
@@ -145,17 +155,16 @@ export default class MainPresenter {
       replace(this.#sortListComponent, this.#messageComponent);
     } else {
       this.#onFilterChange(DEFAULT_FILTER);
-      this.#filtersListComponent.reset();
     }
 
-    this.#eventsPresenter.addNewEvent();
+    this.#eventsPresenter.renderNewEvent();
   };
 
   #onNewEventDestroy = () => {
     this.#newEventButtonComponent.unblock();
 
     if (!this.#eventsModel.events.length) {
-      replace(this.#messageComponent, this.#sortListComponent);
+      this.#renderMessage();
     }
   };
 }

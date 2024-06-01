@@ -1,34 +1,31 @@
 import EditEventView from '../view/edit-event-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
-import { UserAction, UpdateType, NEW_EVENT } from '../consts.js';
-
+import { UserAction, NEW_EVENT } from '../consts.js';
 export default class NewEventPresenter {
   #container = null;
-  #eventsModel = null;
+  #newEventComponent = null;
   #event = NEW_EVENT;
-  #editEventComponent = null;
-  #onDataChange = null;
-  #onDestroy = null;
+  #destinations = null;
   #getDestinationById = null;
   #getDestinationByName = null;
   #getOffersByType = null;
+  #onDataChange = null;
+  #onDestroy = null;
 
-  constructor({ container, model, onDataChange, onDestroy, getDestinationById, getDestinationByName, getOffersByType }) {
+  constructor({ container, destinations, getDestinationById, getDestinationByName, getOffersByType, onDataChange, onDestroy }) {
     this.#container = container;
-    this.#eventsModel = model;
-    this.#onDataChange = onDataChange;
-    this.#onDestroy = onDestroy;
+    this.#destinations = destinations;
     this.#getDestinationById = getDestinationById;
     this.#getDestinationByName = getDestinationByName;
     this.#getOffersByType = getOffersByType;
+    this.#onDataChange = onDataChange;
+    this.#onDestroy = onDestroy;
   }
 
   init() {
-    const destinations = this.#eventsModel.destinations;
-
-    this.#editEventComponent = new EditEventView({
+    this.#newEventComponent = new EditEventView({
       event: this.#event,
-      destinations,
+      destinations: this.#destinations,
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
@@ -36,12 +33,12 @@ export default class NewEventPresenter {
       onCancel: this.#onCancel,
     });
 
-    render(this.#editEventComponent, this.#container, RenderPosition.AFTERBEGIN);
+    render(this.#newEventComponent, this.#container, RenderPosition.AFTERBEGIN);
     document.addEventListener('keydown', this.#onEscKeydown);
   }
 
   destroy() {
-    remove(this.#editEventComponent);
+    remove(this.#newEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
@@ -57,6 +54,6 @@ export default class NewEventPresenter {
   };
 
   #onFormSubmit = (event) => {
-    this.#onDataChange(UserAction.ADD_EVENT, UpdateType.MAJOR, event);
+    this.#onDataChange(UserAction.ADD_EVENT, event);
   };
 }

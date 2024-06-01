@@ -64,7 +64,7 @@ const createOffersTemplate = (offers, offersIds = []) =>
 
 const createEventDetailsTemplate = (offers, offersIds, destination) => {
   const offersTemplate = offers.length ? createOffersTemplate(offers, offersIds) : '';
-  const destinationTemplate = Object.keys(destination).length ? createDestinationTemplate(destination) : '';
+  const destinationTemplate = destination ? createDestinationTemplate(destination) : '';
 
   return `<section class="event__details">
     ${offersTemplate}

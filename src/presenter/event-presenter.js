@@ -1,49 +1,46 @@
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { UserAction, UpdateType } from '../consts.js';
+import { UserAction } from '../consts.js';
 import { SortType } from '../utils/sort.js';
 
 const Mode = {
   VIEW: 'view',
   EDIT: 'edit',
 };
-
 export default class EventPresenter {
   #container = null;
-  #eventsModel = null;
-  #event = null;
   #viewEventComponent = null;
   #editEventComponent = null;
-  #onDataChange = null;
-  #onModeChange = null;
-  #mode = Mode.VIEW;
+  #event = null;
+  #destinations = null;
   #getDestinationById = null;
   #getDestinationByName = null;
   #getOffersByType = null;
+  #onDataChange = null;
+  #onModeChange = null;
+  #mode = Mode.VIEW;
 
-  constructor({ container, model, onDataChange, onModeChange, getDestinationById, getDestinationByName, getOffersByType }) {
+  constructor({ container, destinations, getDestinationById, getDestinationByName, getOffersByType, onDataChange, onModeChange }) {
     this.#container = container;
-    this.#eventsModel = model;
-    this.#onDataChange = onDataChange;
-    this.#onModeChange = onModeChange;
+    this.#destinations = destinations;
     this.#getDestinationById = getDestinationById;
     this.#getDestinationByName = getDestinationByName;
     this.#getOffersByType = getOffersByType;
+    this.#onDataChange = onDataChange;
+    this.#onModeChange = onModeChange;
   }
 
   init(event) {
     this.#event = event;
 
-    const destinations = this.#eventsModel.destinations;
-    const destination = this.#eventsModel.getDestinationNameById(this.#event.destination);
     const prevViewEventComponent = this.#viewEventComponent;
     const prevEditEventComponent = this.#editEventComponent;
 
     this.#viewEventComponent = new EventView({
       event: {
         ... this.#event,
-        destination,
+        destination: this.#getDestinationById(this.#event.destination).name,
         typeOffers: this.#getOffersByType(this.#event.type)
       },
       onEdit: this.#onEdit,
@@ -52,7 +49,7 @@ export default class EventPresenter {
 
     this.#editEventComponent = new EditEventView({
       event: this.#event,
-      destinations,
+      destinations: this.#destinations,
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
@@ -80,7 +77,6 @@ export default class EventPresenter {
 
   resetView() {
     if (this.#mode !== Mode.VIEW) {
-      this.#editEventComponent.reset(this.#event);
       this.#changeEditToView();
     }
   }
@@ -117,11 +113,11 @@ export default class EventPresenter {
   };
 
   #onFavoriteClick = () => {
-    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, {...this.#event, isFavorite: !this.#event.isFavorite});
+    this.#onDataChange(UserAction.UPDATE_EVENT, {...this.#event, isFavorite: !this.#event.isFavorite}, { patch: true });
   };
 
   #onDelete = () => {
-    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
+    this.#onDataChange(UserAction.DELETE_EVENT, this.#event);
   };
 
   #onFormSubmit = (event) => {
@@ -131,7 +127,7 @@ export default class EventPresenter {
       [SortType.PRICE]: this.#event.basePrice !== event.basePrice,
     };
 
-    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, event, changedOptions);
+    this.#onDataChange(UserAction.UPDATE_EVENT, event, changedOptions);
     this.#changeEditToView();
   };
 

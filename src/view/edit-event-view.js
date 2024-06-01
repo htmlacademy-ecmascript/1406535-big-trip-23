@@ -84,7 +84,7 @@ export default class EditEventView extends AbstractStatefulView {
       this.#isNewEvent = true;
     }
 
-    this._setState(EditEventView.parseEventToState(event, this.#getDestinationById(event.destination)));
+    this._setState(EditEventView.parseEventToState(event, this.#isNewEvent ? '' : this.#getDestinationById(event.destination)));
     this._restoreHandlers();
   }
 
@@ -93,9 +93,8 @@ export default class EditEventView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
-    this.element.addEventListener('submit', this.#onFormSubmit);
+    this.element.querySelector('form').addEventListener('submit', this.#onFormSubmit);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#onEventTypeChange);
-    // Исправлю ошибку с Esc попозже
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#onDestinationChange);
     this.element.querySelector('.event__input--price').addEventListener('blur', this.#onPriceChange);
     this.#setDatepickers();
@@ -164,7 +163,14 @@ export default class EditEventView extends AbstractStatefulView {
     this.updateElement({ type: changedType, offers: [] });
   };
 
-  #onDestinationChange = (evt) => this.updateElement({ destination: this.#getDestinationByName(evt.target.value) });
+  #onDestinationChange = (evt) => {
+    if (!this.#getDestinationByName(evt.target.value)) {
+      this.shake();
+      evt.target.value = '';
+      return;
+    }
+    this.updateElement({ destination: this.#getDestinationByName(evt.target.value) });
+  };
 
   #onPriceChange = (evt) => this._setState({ basePrice: parseInt(evt.target.value, 10) });
 
@@ -180,6 +186,11 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onFormSubmit = (evt) => {
     evt.preventDefault();
+
+    if (!this._state.destination) {
+      return;
+    }
+
     this._setState({ offers: this.#getCheckedOfferIds() });
     this.#onSubmit(EditEventView.parseStateToEvent(this._state, this._state.destination.id));
   };
