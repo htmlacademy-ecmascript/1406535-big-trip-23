@@ -8,6 +8,8 @@ const SortType = {
   OPTION: 'offers',
 };
 
+const sortTypes = Object.values(SortType);
+
 const DEFAULT_SORT = SortType.DATE;
 const DISABLED_SORTS = [SortType.EVENT, SortType.OPTION];
 
@@ -17,4 +19,4 @@ const sorting = {
   [SortType.PRICE]: (events) => [...events].sort((a, b) => b.basePrice - a.basePrice),
 };
 
-export { sorting, SortType, DEFAULT_SORT, DISABLED_SORTS };
+export { sorting, SortType, sortTypes, DEFAULT_SORT, DISABLED_SORTS };

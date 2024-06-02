@@ -10,7 +10,6 @@ export default class EventsPresenter {
   #eventPresenters = new Map();
   #newEventPresenter = null;
   #eventsListComponent = new EventsListView();
-  #destinations = null;
   #sort = null;
   #onDestroy = null;
 
@@ -18,7 +17,6 @@ export default class EventsPresenter {
     this.#container = container;
     this.#eventsModel = model;
     this.#onDestroy = onDestroy;
-    this.#destinations = this.#eventsModel.destinations;
 
     render(this.#eventsListComponent, this.#container, RenderPosition.BEFOREEND);
 
@@ -50,7 +48,7 @@ export default class EventsPresenter {
   }
 
   renderNewEvent() {
-    this.#newEventPresenter.init(this.#destinations);
+    this.#newEventPresenter.init(this.destinations);
   }
 
   #renderEvent(event) {

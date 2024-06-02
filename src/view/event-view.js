@@ -22,8 +22,7 @@ const createEventTemplate = (event) => {
 
   const FavoriteClassName = event.isFavorite ? 'event__favorite-btn--active' : '';
 
-  return (
-    `<li class="trip-events__item">
+  return `<li class="trip-events__item">
       <div class="event">
         <time class="event__date" datetime="${eventDate}">${eventDateBrief}</time>
 
@@ -57,7 +56,7 @@ const createEventTemplate = (event) => {
 
         <button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>
       </div
-    <li>`);
+    <li>`;
 };
 
 export default class EventView extends AbstractView {
