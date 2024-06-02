@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { DEFAULT_FILTER, filterTypes } from '../utils/filter.js';
+import { FILTER_TYPES, DEFAULT_FILTER } from '../utils/filter.js';
 
 const ID_PREFIX = 'filter-';
 
@@ -15,7 +15,7 @@ const createFiltersListTemplate = () =>
       <div class="trip-controls__filters">
         <h2 class="visually-hidden">Filter events</h2>
         <form class="trip-filters" action="#" method="get">
-          ${filterTypes.map(createFilterTemplate).join('')}
+          ${FILTER_TYPES.map(createFilterTemplate).join('')}
           <button class="visually-hidden" type="submit">Accept filter</button>
         </form>
       </div>

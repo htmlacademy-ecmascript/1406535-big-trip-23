@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { sortTypes, DISABLED_SORTS, DEFAULT_SORT } from '../utils/sort.js';
+import { SORT_TYPES, DISABLED_SORTS, DEFAULT_SORT } from '../utils/sort.js';
 
 const ID_PREFIX = 'sort-';
 
@@ -25,7 +25,7 @@ export default class SortListView extends AbstractView {
 
   get template() {
     return `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-      ${sortTypes.map(createSortTemplate).join('')}</form>`;
+      ${SORT_TYPES.map(createSortTemplate).join('')}</form>`;
   }
 
   reset() {
