@@ -52,6 +52,7 @@ export default class MainPresenter {
   }
 
   init() {
+    this.#filtersListComponent.update(this.filters);
     if (!this.#eventsModel.events.length) {
       this.#filter = DEFAULT_FILTER;
       this.#filtersListComponent.update(this.filters);
@@ -70,11 +71,7 @@ export default class MainPresenter {
   }
 
   #renderFiltersComponent() {
-    this.#filtersListComponent = new FiltersListView({
-      filters: this.filters,
-      currentFilter: this.#filter,
-      callback: this.#onFilterChange
-    });
+    this.#filtersListComponent = new FiltersListView({ callback: this.#onFilterChange });
     render(this.#filtersListComponent, this.#topContainer, RenderPosition.BEFOREEND);
   }
 

@@ -24,13 +24,16 @@ export default class EventsPresenter {
 
     this.#newEventPresenter = new NewEventPresenter({
       container: this.#eventsListComponent.element,
-      destinations: this.#destinations,
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
       onDataChange: this.#onViewAction,
       onDestroy: this.#onNewEventDestroy,
     });
+  }
+
+  get destinations() {
+    return this.#eventsModel.destinations;
   }
 
   init(events, sort) {
@@ -47,13 +50,13 @@ export default class EventsPresenter {
   }
 
   renderNewEvent() {
-    this.#newEventPresenter.init();
+    this.#newEventPresenter.init(this.#destinations);
   }
 
   #renderEvent(event) {
     const eventPresenter = new EventPresenter({
       container: this.#eventsListComponent.element,
-      destinations: this.#destinations,
+      destinations: this.destinations,
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
