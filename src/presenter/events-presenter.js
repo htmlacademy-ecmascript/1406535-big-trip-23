@@ -1,9 +1,9 @@
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import EventsListView from '../view/events-list-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { render, RenderPosition } from '../framework/render.js';
-import { UpdateType, UserAction } from '../consts.js';
-
+import { UpdateType, UserAction, TimeLimit } from '../consts.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
@@ -12,6 +12,10 @@ export default class EventsPresenter {
   #eventsListComponent = new EventsListView();
   #sort = null;
   #onDestroy = null;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor({ container, model, onDestroy }) {
     this.#container = container;
@@ -80,7 +84,9 @@ export default class EventsPresenter {
   #getDestinationByName = (name) => this.#eventsModel.getDestinationByName(name);
   #getOffersByType = (type) => this.#eventsModel.getOffersByType(type);
 
-  #onViewAction = (actionType, update, changedOptions) => {
+  #onViewAction = async (actionType, update, changedOptions) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
         if (changedOptions.patch) {
@@ -90,14 +96,16 @@ export default class EventsPresenter {
         this.#eventsModel.updateEvent(changedOptions[this.#sort] ? UpdateType.MAJOR : UpdateType.MINOR, update);
         break;
       case UserAction.ADD_EVENT:
-        this.#onNewEventDestroy();
         this.#eventsModel.addEvent(UpdateType.MAJOR, update);
+        this.#onNewEventDestroy();
         break;
       case UserAction.DELETE_EVENT:
-        this.#deleteEvent(update);
         this.#eventsModel.deleteEvent(UpdateType.MINOR, update);
+        this.#deleteEvent(update);
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #onModeChange = () => {
