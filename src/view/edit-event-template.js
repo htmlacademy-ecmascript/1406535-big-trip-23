@@ -9,16 +9,16 @@ const createTypeTemplate = (type, selectedType) => {
   </div>`;
 };
 
-const createTypesListTemplate = (type = EVENT_DEFAULT_TYPE) =>
+const createTypesListTemplate = (type = EVENT_DEFAULT_TYPE, isDisabled) =>
   `<div class="event__type-wrapper">
     <label class="event__type  event__type-btn" for="event-type-toggle-1">
       <span class="visually-hidden">Choose event type</span>
       <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
     </label>
-    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
     <div class="event__type-list">
-      <fieldset class="event__type-group">
+      <fieldset class="event__type-group" ${isDisabled ? 'disabled' : ''}>
         <legend class="visually-hidden">Event type</legend>
         ${EVENT_TYPES.map((item) => createTypeTemplate(item, type)).join('')}
       </fieldset>
@@ -42,28 +42,30 @@ const createDestinationTemplate = (description, pictures) => {
   </section>`;
 };
 
-const createOfferTemplate = (offer, offersIds) => {
+const createOfferTemplate = (offer, offersIds, isDisabled) => {
   const id = offer.title.split(' ').pop();
   const checkedSign = offersIds.includes(offer.id) ? 'checked' : '';
+  const disabledSign = isDisabled ? 'disabled' : '';
 
   return `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}-1" type="checkbox" name="event-offer-${id}" ${checkedSign} data-id="${offer.id}">
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}-1" type="checkbox"
+    name="event-offer-${id}" data-id="${offer.id}" ${checkedSign} ${disabledSign}>
     <label class="event__offer-label" for="event-offer-${id}-1"><span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span></label>
   </div>`;
 };
 
-const createOffersTemplate = (offers, offersIds = []) =>
+const createOffersTemplate = (offers, offersIds = [], isDisabled) =>
   `<section class="event__section  event__section--offers">
     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
     <div class="event__available-offers">
-      ${offers.map((item) => createOfferTemplate(item, offersIds)).join('')}
+      ${offers.map((item) => createOfferTemplate(item, offersIds, isDisabled)).join('')}
     </div>
   </section>`;
 
-const createEventDetailsTemplate = (offers, offersIds, {description, pictures}) => {
-  const offersTemplate = offers.length ? createOffersTemplate(offers, offersIds) : '';
+const createEventDetailsTemplate = (offers, offersIds, {description, pictures}, isDisabled) => {
+  const offersTemplate = offers.length ? createOffersTemplate(offers, offersIds, isDisabled) : '';
   const destinationTemplate = pictures?.length || description ? createDestinationTemplate(description, pictures) : '';
 
   return `<section class="event__details">
