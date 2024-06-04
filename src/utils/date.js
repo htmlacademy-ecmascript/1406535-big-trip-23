@@ -65,7 +65,7 @@ const date = {
   },
 
   isCurrent(start, end) {
-    return dayjs().isAfter(start) || dayjs().isSame(start) && dayjs().isBefore(end) || dayjs().isSame(end);
+    return (dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end));
   },
 
   isFuture(start) {

@@ -38,4 +38,7 @@ const TimeLimit = {
   UPPER_LIMIT: 1000,
 };
 
-export { EVENT_TYPES, NEW_EVENT, HOURS_IN_DAY, MINUTES_IN_HOUR, EVENT_DEFAULT_TYPE, UserAction, UpdateType, Loading, TimeLimit };
+const URL = 'https://23.objects.htmlacademy.pro/big-trip';
+const AUTHORIZATION = 'Basic jlyf;lsdFvthbrT';
+
+export { EVENT_TYPES, NEW_EVENT, HOURS_IN_DAY, MINUTES_IN_HOUR, EVENT_DEFAULT_TYPE, UserAction, UpdateType, Loading, TimeLimit, URL, AUTHORIZATION };
