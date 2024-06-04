@@ -39,6 +39,6 @@ const TimeLimit = {
 };
 
 const URL = 'https://23.objects.htmlacademy.pro/big-trip';
-const AUTHORIZATION = 'Basic jlyf;lsdFvthbrT';
+const AUTHORIZATION = 'Basic pfljk,fkjec`';
 
 export { EVENT_TYPES, NEW_EVENT, HOURS_IN_DAY, MINUTES_IN_HOUR, EVENT_DEFAULT_TYPE, UserAction, UpdateType, Loading, TimeLimit, URL, AUTHORIZATION };

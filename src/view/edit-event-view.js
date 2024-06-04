@@ -84,10 +84,10 @@ export default class EditEventView extends AbstractStatefulView {
     this.#onReset = onFormReset;
     this.#onSubmit = onFormSubmit;
     this.#onDelete = onDelete;
+    this.#onCancel = onCancel;
     this.#typeOffers = this.#getOffersByType(event.type);
 
-    if (onCancel) {
-      this.#onCancel = onCancel;
+    if (!event.id) {
       this.#isNewEvent = true;
     }
 
@@ -159,9 +159,7 @@ export default class EditEventView extends AbstractStatefulView {
   }
 
   #getCheckedOfferIds() {
-    const checkedOffers = [];
-    this.element.querySelectorAll('.event__offer-checkbox:checked').forEach((offer) => checkedOffers.push(offer.dataset.id));
-    return checkedOffers;
+    return Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'), (offer) => offer.dataset.id);
   }
 
   #onEventTypeChange = (evt) => {
