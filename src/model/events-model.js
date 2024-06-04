@@ -1,5 +1,5 @@
 import Observable from '../framework/observable.js';
-import { getObjectFromArrayByKey, getRandomInt } from '../utils/utils.js';
+import { getObjectFromArrayByKey } from '../utils/utils.js';
 import { UpdateType } from '../consts.js';
 export default class EventsModel extends Observable {
   #events = [];
