@@ -8,7 +8,7 @@ const createMessageText = ({ loading, filter }) => {
       return 'Loading...';
     case Loading.ERROR:
       return 'Failed to load latest route information';
-    case null:
+    case Loading.COMPLETE:
       return filter === DEFAULT_FILTER ? 'Click New Event to create your first point' : `There are no ${filter} events now`;
   }
 };

@@ -5,7 +5,7 @@ const DATE_FORMATS = {
   day: 'YYYY-MM-DD',
   brief: 'MMM D',
   briefReversed: 'D MMM',
-  time: 'hh:mm',
+  time: 'HH:mm',
   machine: 'YYYY-MM-DDTHH:mm',
   dayTime: 'DD/MM/YY HH:mm',
 };

@@ -40,6 +40,24 @@ export default class NewEventPresenter {
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
+  setSaving() {
+    this.#newEventComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#newEventComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+      });
+    };
+
+    this.#newEventComponent.shake(resetFormState);
+  }
+
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();

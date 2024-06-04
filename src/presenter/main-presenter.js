@@ -51,16 +51,16 @@ export default class MainPresenter {
   }
 
   init() {
-    if (!this.#eventsModel.events.length) {
-      this.#filter = DEFAULT_FILTER;
-      this.#filtersListComponent.update(this.filters);
-    }
-
     if (this.#messageComponent) {
       this.#removeMessage();
     }
 
     if (!this.events.length || this.#loading) {
+      if (!this.#eventsModel.events.length) {
+        this.#filter = DEFAULT_FILTER;
+        this.#filtersListComponent.update(this.filters);
+        this.#filtersListComponent.reset();
+      }
       this.#renderMessage();
       return;
     }
@@ -76,6 +76,7 @@ export default class MainPresenter {
   #renderNewEventButtonComponent() {
     this.#newEventButtonComponent = new NewEventButtonView({ callback: this.#addNewEventClick });
     render(this.#newEventButtonComponent, this.#topContainer, RenderPosition.BEFOREEND);
+    this.#newEventButtonComponent.block();
   }
 
   #renderSortsComponent() {
@@ -96,43 +97,29 @@ export default class MainPresenter {
 
   // Как это можно назвать? Это нужно если текущий фильтр отличается от дефолтного, но мы грохнули все эвенты.
   // #something() {
-  //   if (this.#eventsModel.events.length) {
-  //     return;
-  //   }
-
+  //   if (!this.#eventsModel.events.length) {
   //   this.#filter = DEFAULT_FILTER;
   //   this.#filtersListComponent.update(this.filters);
+  //   this.#filtersListComponent.reset());
+  //  }
   // }
 
   #onModelEvent = (updateType, data) => {
-    if (!data & !this.events.length) {
-      if (!this.#eventsModel.events.length) {
-        this.#filter = DEFAULT_FILTER;
-        this.#filtersListComponent.update(this.filters);
-      }
-      this.#renderMessage();
+    if (data) {
+      this.#eventsPresenter.rerenderEvent(data);
       return;
     }
 
-    switch (updateType) {
-      case UpdateType.PATCH:
-        this.#eventsPresenter.rerenderEvent(data);
-        break;
-      case UpdateType.MINOR:
-        this.#filtersListComponent.update(this.filters);
-        if (data) {
-          this.#eventsPresenter.rerenderEvent(data);
-        }
-        break;
-      case UpdateType.MAJOR:
-        this.#filtersListComponent.update(this.filters);
-        this.init();
-        break;
-      case UpdateType.INIT:
-        this.#filtersListComponent.update(this.filters);
-        this.#loading = !this.#eventsModel.destinations.length || !this.#eventsModel.offers.length ? Loading.ERROR : null;
-        this.init();
+    this.#filtersListComponent.update(this.filters);
+    if(updateType === UpdateType.INIT) {
+      if (!this.#eventsModel.destinations.length || !this.#eventsModel.offers.length) {
+        this.#loading = Loading.ERROR;
+      } else {
+        this.#loading = Loading.COMPLETE;
+        this.#newEventButtonComponent.unblock();
+      }
     }
+    this.init();
   };
 
   #onFilterChange = (changedFilter) => {
@@ -161,6 +148,7 @@ export default class MainPresenter {
 
   #onNewEventDestroy = () => {
     this.#newEventButtonComponent.unblock();
+    this.#eventsPresenter.deleteNewEvent();
 
     if (!this.#eventsModel.events.length) {
       this.#renderMessage();

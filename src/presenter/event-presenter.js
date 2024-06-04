@@ -87,6 +87,40 @@ export default class EventPresenter {
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDIT) {
+      this.#editEventComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDIT) {
+      this.#editEventComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#mode !== Mode.VIEW) {
+      this.#viewEventComponent.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#editEventComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+    this.#editEventComponent.shake(resetFormState);
+  }
+
   #changeViewToEdit() {
     replace(this.#editEventComponent, this.#viewEventComponent);
     document.addEventListener('keydown', this.#onEscKeydown);

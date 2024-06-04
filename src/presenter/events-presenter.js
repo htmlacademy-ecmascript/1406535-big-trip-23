@@ -1,9 +1,9 @@
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import EventsListView from '../view/events-list-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import { render, RenderPosition } from '../framework/render.js';
-import { UpdateType, UserAction } from '../consts.js';
-
+import { UpdateType, UserAction, TimeLimit } from '../consts.js';
 export default class EventsPresenter {
   #container = null;
   #eventsModel = null;
@@ -12,6 +12,10 @@ export default class EventsPresenter {
   #eventsListComponent = new EventsListView();
   #sort = null;
   #onDestroy = null;
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor({ container, model, onDestroy }) {
     this.#container = container;
@@ -26,7 +30,7 @@ export default class EventsPresenter {
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
       onDataChange: this.#onViewAction,
-      onDestroy: this.#onNewEventDestroy,
+      onDestroy: this.#onDestroy,
     });
   }
 
@@ -35,6 +39,8 @@ export default class EventsPresenter {
   }
 
   init(events, sort) {
+    this.#onDestroy();
+
     if (this.#eventPresenters.size) {
       this.#clearEventsList();
     }
@@ -49,6 +55,10 @@ export default class EventsPresenter {
 
   renderNewEvent() {
     this.#newEventPresenter.init(this.destinations);
+  }
+
+  deleteNewEvent() {
+    this.#newEventPresenter.destroy();
   }
 
   #renderEvent(event) {
@@ -66,11 +76,6 @@ export default class EventsPresenter {
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
-  #deleteEvent(event) {
-    this.#eventPresenters.get(event.id).destroy();
-    this.#eventPresenters.delete(event.id);
-  }
-
   #clearEventsList() {
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
@@ -80,33 +85,45 @@ export default class EventsPresenter {
   #getDestinationByName = (name) => this.#eventsModel.getDestinationByName(name);
   #getOffersByType = (type) => this.#eventsModel.getOffersByType(type);
 
-  #onViewAction = (actionType, update, changedOptions) => {
+  #onViewAction = async (actionType, update, changedOptions) => {
+    this.#uiBlocker.block();
+
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
-        if (changedOptions.patch) {
-          this.#eventsModel.updateEvent(UpdateType.PATCH, update);
-          break;
+        this.#eventPresenters.get(update.id).setSaving();
+        try {
+          if (changedOptions.patch) {
+            await this.#eventsModel.updateEvent(UpdateType.PATCH, update);
+          } else {
+            await this.#eventsModel.updateEvent(changedOptions[this.#sort] ? UpdateType.MAJOR : UpdateType.MINOR, update);
+          }
+        } catch(err) {
+          this.#eventPresenters.get(update.id).setAborting();
         }
-        this.#eventsModel.updateEvent(changedOptions[this.#sort] ? UpdateType.MAJOR : UpdateType.MINOR, update);
         break;
       case UserAction.ADD_EVENT:
-        this.#onNewEventDestroy();
-        this.#eventsModel.addEvent(UpdateType.MAJOR, update);
+        this.#newEventPresenter.setSaving();
+        try {
+          await this.#eventsModel.addEvent(UpdateType.MAJOR, update);
+        } catch(err) {
+          this.#newEventPresenter.setAborting();
+        }
         break;
       case UserAction.DELETE_EVENT:
-        this.#deleteEvent(update);
-        this.#eventsModel.deleteEvent(UpdateType.MINOR, update);
+        this.#eventPresenters.get(update.id).setDeleting();
+        try {
+          await this.#eventsModel.deleteEvent(UpdateType.MINOR, update);
+        } catch(err) {
+          this.#eventPresenters.get(update.id).setAborting();
+        }
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
   #onModeChange = () => {
-    this.#onNewEventDestroy();
-    this.#eventPresenters.forEach((presenter) => presenter.resetView());
-  };
-
-  #onNewEventDestroy = () => {
-    this.#newEventPresenter.destroy();
     this.#onDestroy();
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 }

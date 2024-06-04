@@ -38,6 +38,27 @@ export default class EventsApiService extends ApiService {
     return parsedResponse;
   }
 
+  async addEvent(event) {
+    const response = await this._load({
+      url: Route.EVENTS,
+      method: Method.POST,
+      body: JSON.stringify(this.#adaptToServer(event)),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    });
+
+    const parsedResponse = await ApiService.parseResponse(response);
+    return parsedResponse;
+  }
+
+  async deleteEvent(event) {
+    const response = await this._load({
+      url: `${Route.EVENTS}/${event.id}`,
+      method: Method.DELETE,
+    });
+
+    return response;
+  }
+
   adaptToClient(event) {
     const adaptedEvent = {
       ...event,
