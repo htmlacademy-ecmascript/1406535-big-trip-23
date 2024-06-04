@@ -6,8 +6,7 @@ import MessageView from '../view/message-view.js';
 import { render, RenderPosition, replace } from '../framework/render.js';
 import { getFilters, filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { sorting, DEFAULT_SORT } from '../utils/sort.js';
-import { UpdateType } from '../consts.js';
-// import { UpdateType, Loading } from '../consts.js';
+import { UpdateType, Loading } from '../consts.js';
 
 export default class MainPresenter {
   #topContainer = null;
@@ -20,7 +19,7 @@ export default class MainPresenter {
   #newEventButtonComponent = null;
   #filter = DEFAULT_FILTER;
   #sort = DEFAULT_SORT;
-  #loading = null;
+  #loading = Loading.IN_PROGRESS;
 
   constructor({ topContainer, bottomContainer, model }) {
     this.#topContainer = topContainer;
@@ -57,24 +56,20 @@ export default class MainPresenter {
       this.#filtersListComponent.update(this.filters);
     }
 
-    if (!this.events.length) {
-      this.#renderMessage();
-      return;
-    }
-
     if (this.#messageComponent) {
       this.#removeMessage();
+    }
+
+    if (!this.events.length || this.#loading) {
+      this.#renderMessage();
+      return;
     }
 
     this.#eventsPresenter.init(this.events, this.#sort);
   }
 
   #renderFiltersComponent() {
-    this.#filtersListComponent = new FiltersListView({
-      filters: this.filters,
-      currentFilter: this.#filter,
-      callback: this.#onFilterChange
-    });
+    this.#filtersListComponent = new FiltersListView({ callback: this.#onFilterChange });
     render(this.#filtersListComponent, this.#topContainer, RenderPosition.BEFOREEND);
   }
 
@@ -84,7 +79,7 @@ export default class MainPresenter {
   }
 
   #renderSortsComponent() {
-    this.#sortListComponent = new SortListView({ currentSort: this.#sort, callback: this.#onSortChange });
+    this.#sortListComponent = new SortListView({ callback: this.#onSortChange });
     render(this.#sortListComponent, this.#bottomContainer, RenderPosition.AFTERBEGIN);
   }
 
@@ -133,6 +128,10 @@ export default class MainPresenter {
         this.#filtersListComponent.update(this.filters);
         this.init();
         break;
+      case UpdateType.INIT:
+        this.#filtersListComponent.update(this.filters);
+        this.#loading = !this.#eventsModel.destinations.length || !this.#eventsModel.offers.length ? Loading.ERROR : null;
+        this.init();
     }
   };
 

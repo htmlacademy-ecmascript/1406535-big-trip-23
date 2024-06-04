@@ -1,17 +1,16 @@
-import { createMockOffers } from '../mock/offers.js';
-import { createMockEvents } from '../mock/events.js';
-import { createMockDestinations } from '../mock/destinations.js';
 import Observable from '../framework/observable.js';
 import { getObjectFromArrayByKey, getRandomInt } from '../utils/utils.js';
-
-const mockEvents = createMockEvents();
-const mockDestinations = createMockDestinations();
-const mockOffers = createMockOffers();
-
+import { UpdateType } from '../consts.js';
 export default class EventsModel extends Observable {
-  #events = null;
-  #destinations = null;
-  #offers = null;
+  #events = [];
+  #destinations = [];
+  #offers = [];
+  #apiService = null;
+
+  constructor({ apiService }) {
+    super();
+    this.#apiService = apiService;
+  }
 
   get destinations() {
     return this.#destinations;
@@ -38,15 +37,21 @@ export default class EventsModel extends Observable {
     return getObjectFromArrayByKey(typeOffers, 'id', id)?.price || null;
   };
 
-  updateEvent(updateType, update) {
+  async updateEvent(updateType, update) {
     const index = this.#events.findIndex((event) => event.id === update.id);
 
     if (index === -1) {
       throw new Error('Can\'t update unexisting task');
     }
 
-    this.#events = [...this.#events.slice(0, index), update, ...this.#events.slice(index + 1)];
-    this._notify(updateType, update);
+    try {
+      const response = await this.#apiService.updateEvent(update);
+      const updatedEvent = this.#apiService.adaptToClient(response);
+      this.#events = [...this.#events.slice(0, index), updatedEvent, ...this.#events.slice(index + 1)];
+      this._notify(updateType, update);
+    } catch(err) {
+      throw new Error('Can\'t update event');
+    }
   }
 
   addEvent(updateType, update) {
@@ -66,9 +71,18 @@ export default class EventsModel extends Observable {
     this._notify(updateType);
   }
 
-  init() {
-    this.#events = mockEvents;
-    this.#destinations = mockDestinations;
-    this.#offers = mockOffers;
+  async init() {
+    try {
+      const events = await this.#apiService.events;
+      this.#events = events.map(this.#apiService.adaptToClient);
+      this.#destinations = await this.#apiService.destinations;
+      this.#offers = await this.#apiService.offers;
+    } catch(err) {
+      this.#events = [];
+      this.#destinations = [];
+      this.#offers = [];
+    }
+
+    this._notify(UpdateType.INIT);
   }
 }

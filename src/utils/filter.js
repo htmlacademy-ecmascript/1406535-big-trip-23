@@ -9,6 +9,8 @@ const FilterType = {
 
 const DEFAULT_FILTER = FilterType.ALL;
 
+const FILTER_TYPES = Object.values(FilterType);
+
 const filtrate = {
   [FilterType.ALL]: (events) => events,
   [FilterType.FUTURE]: (events) => events.filter((event) => date.isFuture(event.dateFrom)),
@@ -21,4 +23,4 @@ const getFilters = (events) =>
     ([type, filtered]) => ({ filter: type, isAvailable: filtered(events).length !== 0 })
   );
 
-export { filtrate, FilterType, DEFAULT_FILTER, getFilters };
+export { filtrate, FilterType, DEFAULT_FILTER, FILTER_TYPES, getFilters };

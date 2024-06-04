@@ -32,7 +32,7 @@ const createPhotosTemplate = (photos) =>
     </div>
   </div>`;
 
-const createDestinationTemplate = ({ description, pictures }) => {
+const createDestinationTemplate = (description, pictures) => {
   const picturesTemplate = pictures.length ? createPhotosTemplate(pictures) : '';
 
   return ` <section class="event__section  event__section--destination">
@@ -62,9 +62,9 @@ const createOffersTemplate = (offers, offersIds = []) =>
     </div>
   </section>`;
 
-const createEventDetailsTemplate = (offers, offersIds, destination) => {
+const createEventDetailsTemplate = (offers, offersIds, {description, pictures}) => {
   const offersTemplate = offers.length ? createOffersTemplate(offers, offersIds) : '';
-  const destinationTemplate = destination ? createDestinationTemplate(destination) : '';
+  const destinationTemplate = pictures?.length || description ? createDestinationTemplate(description, pictures) : '';
 
   return `<section class="event__details">
     ${offersTemplate}

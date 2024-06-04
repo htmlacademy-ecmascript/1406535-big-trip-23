@@ -5,16 +5,14 @@ export default class NewEventPresenter {
   #container = null;
   #newEventComponent = null;
   #event = NEW_EVENT;
-  #destinations = null;
   #getDestinationById = null;
   #getDestinationByName = null;
   #getOffersByType = null;
   #onDataChange = null;
   #onDestroy = null;
 
-  constructor({ container, destinations, getDestinationById, getDestinationByName, getOffersByType, onDataChange, onDestroy }) {
+  constructor({ container, getDestinationById, getDestinationByName, getOffersByType, onDataChange, onDestroy }) {
     this.#container = container;
-    this.#destinations = destinations;
     this.#getDestinationById = getDestinationById;
     this.#getDestinationByName = getDestinationByName;
     this.#getOffersByType = getOffersByType;
@@ -22,10 +20,10 @@ export default class NewEventPresenter {
     this.#onDestroy = onDestroy;
   }
 
-  init() {
+  init(destinations) {
     this.#newEventComponent = new EditEventView({
       event: this.#event,
-      destinations: this.#destinations,
+      destinations,
       getDestinationById: this.#getDestinationById,
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
