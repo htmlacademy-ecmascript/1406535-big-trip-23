@@ -1,4 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
+import { DEFAULT_FILTER } from '../utils/filter.js';
 
 const ID_PREFIX = 'filter-';
 
@@ -27,22 +28,33 @@ const createFiltersListTemplate = (filters, currentFilter) =>
 export default class FiltersListView extends AbstractView {
   #filters = null;
   #currentFilter = null;
-  #onChange = null;
+  #filterElements = null;
 
-  constructor({ filters, currentFilter, onChange }) {
+  constructor({ filters, currentFilter, callback }) {
     super();
     this.#filters = filters;
     this.#currentFilter = currentFilter;
-    this.#onChange = onChange;
 
-    this.element.querySelector('form').addEventListener('change', this.#onFilterChange);
+    this.#filterElements = this.element.querySelectorAll('.trip-filters__filter-input');
+
+    this.element.querySelector('form').addEventListener('change', (evt) => {
+      callback(evt.target.id.replace(ID_PREFIX, ''));
+    });
   }
 
   get template() {
     return createFiltersListTemplate(this.#filters, this.#currentFilter);
   }
 
-  #onFilterChange = (evt) => {
-    this.#onChange(evt.target.id.replace(ID_PREFIX, ''));
-  };
+  update(filters) {
+    this.#filterElements.forEach((input, index) => {
+      input.disabled = !filters[index].isAvailable;
+    });
+  }
+
+  reset() {
+    this.#filterElements.forEach((input) => {
+      input.checked = input.id === `${ID_PREFIX}${DEFAULT_FILTER}`;
+    });
+  }
 }

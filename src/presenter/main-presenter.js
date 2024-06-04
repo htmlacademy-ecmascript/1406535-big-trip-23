@@ -1,5 +1,4 @@
 import EventsPresenter from './events-presenter.js';
-import TripInfoPresenter from './trip-info-presenter.js';
 import FiltersListView from '../view/filters-list-view.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
 import SortListView from '../view/sort-list-view.js';
@@ -7,98 +6,165 @@ import MessageView from '../view/message-view.js';
 import { render, RenderPosition, replace } from '../framework/render.js';
 import { getFilters, filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { sorting, DEFAULT_SORT } from '../utils/sort.js';
+import { UpdateType } from '../consts.js';
+// import { UpdateType, Loading } from '../consts.js';
 
 export default class MainPresenter {
   #topContainer = null;
   #bottomContainer = null;
   #eventsModel = null;
   #eventsPresenter = null;
-  #initialEvents = null;
-  #events = null;
-  #tripInfoPresenter = null;
-  #filter = null;
-  #filters = null;
   #sortListComponent = null;
+  #filtersListComponent = null;
   #messageComponent = null;
-  #sort = null;
-  #isLoadFail = false;
+  #newEventButtonComponent = null;
+  #filter = DEFAULT_FILTER;
+  #sort = DEFAULT_SORT;
+  #loading = null;
 
   constructor({ topContainer, bottomContainer, model }) {
     this.#topContainer = topContainer;
     this.#bottomContainer = bottomContainer;
     this.#eventsModel = model;
 
-    this.#filter = DEFAULT_FILTER;
-    this.#sort = DEFAULT_SORT;
-  }
-
-  init() {
-    this.#initialEvents = [...this.#eventsModel.events];
-    this.#filters = getFilters(this.#initialEvents);
-    this.#events = filtrate[this.#filter](this.#initialEvents);
-
-    if (this.#filter !== DEFAULT_FILTER) {
-      this.#events = filtrate[this.#filter](this.#initialEvents);
-    }
-
-    this.#tripInfoPresenter = new TripInfoPresenter({ container: this.#topContainer, model: this.#eventsModel });
-    this.#tripInfoPresenter.init(this.#events);
+    this.#eventsModel.addObserver(this.#onModelEvent);
 
     this.#renderFiltersComponent();
     this.#renderNewEventButtonComponent();
     this.#renderSortsComponent();
 
-    if (!this.#initialEvents.length) {
-      this.#renderEmptyListMessage();
+    this.#eventsPresenter = new EventsPresenter({
+      container: this.#bottomContainer,
+      model: this.#eventsModel,
+      onDestroy: this.#onNewEventDestroy
+    });
+  }
+
+  get events() {
+    const events = this.#eventsModel.events;
+    const filteredEvents = filtrate[this.#filter](events);
+    return sorting[this.#sort](filteredEvents);
+  }
+
+  get filters() {
+    const events = this.#eventsModel.events;
+    return getFilters(events);
+  }
+
+  init() {
+    if (!this.#eventsModel.events.length) {
+      this.#filter = DEFAULT_FILTER;
+      this.#filtersListComponent.update(this.filters);
+    }
+
+    if (!this.events.length) {
+      this.#renderMessage();
       return;
     }
 
-    this.#eventsPresenter = new EventsPresenter({ container: this.#bottomContainer, model: this.#eventsModel });
-    this.#eventsPresenter.init(sorting[this.#sort](this.#events));
+    if (this.#messageComponent) {
+      this.#removeMessage();
+    }
+
+    this.#eventsPresenter.init(this.events, this.#sort);
   }
 
   #renderFiltersComponent() {
-    const filtersComponent = new FiltersListView({
-      filters: this.#filters,
+    this.#filtersListComponent = new FiltersListView({
+      filters: this.filters,
       currentFilter: this.#filter,
-      onChange: this.#onFilterChange
+      callback: this.#onFilterChange
     });
-    render(filtersComponent, this.#topContainer, RenderPosition.BEFOREEND);
+    render(this.#filtersListComponent, this.#topContainer, RenderPosition.BEFOREEND);
   }
 
   #renderNewEventButtonComponent() {
-    const newEventButton = new NewEventButtonView();
-    render(newEventButton, this.#topContainer, RenderPosition.BEFOREEND);
+    this.#newEventButtonComponent = new NewEventButtonView({ callback: this.#addNewEventClick });
+    render(this.#newEventButtonComponent, this.#topContainer, RenderPosition.BEFOREEND);
   }
 
   #renderSortsComponent() {
-    this.#sortListComponent = new SortListView({
-      currentSort: this.#sort,
-      onChange: this.#onSortChange
-    });
+    this.#sortListComponent = new SortListView({ currentSort: this.#sort, callback: this.#onSortChange });
     render(this.#sortListComponent, this.#bottomContainer, RenderPosition.AFTERBEGIN);
   }
 
-  #renderEmptyListMessage() {
-    this.#messageComponent = new MessageView({ err: this.#isLoadFail, filter: this.#filter });
+  #renderMessage() {
+    this.#messageComponent = new MessageView({ loading: this.#loading, filter: this.#filter });
     replace(this.#messageComponent, this.#sortListComponent);
   }
 
-  #rerenderEventsList() {
-    this.#eventsPresenter.clearEventsList();
-    this.#eventsPresenter.init(sorting[this.#sort](this.#events));
+  // Это тоже не совсем удаление...
+  #removeMessage() {
+    replace(this.#sortListComponent, this.#messageComponent);
+    this.#messageComponent = null;
   }
+
+  // Как это можно назвать? Это нужно если текущий фильтр отличается от дефолтного, но мы грохнули все эвенты.
+  // #something() {
+  //   if (this.#eventsModel.events.length) {
+  //     return;
+  //   }
+
+  //   this.#filter = DEFAULT_FILTER;
+  //   this.#filtersListComponent.update(this.filters);
+  // }
+
+  #onModelEvent = (updateType, data) => {
+    if (!data & !this.events.length) {
+      if (!this.#eventsModel.events.length) {
+        this.#filter = DEFAULT_FILTER;
+        this.#filtersListComponent.update(this.filters);
+      }
+      this.#renderMessage();
+      return;
+    }
+
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#eventsPresenter.rerenderEvent(data);
+        break;
+      case UpdateType.MINOR:
+        this.#filtersListComponent.update(this.filters);
+        if (data) {
+          this.#eventsPresenter.rerenderEvent(data);
+        }
+        break;
+      case UpdateType.MAJOR:
+        this.#filtersListComponent.update(this.filters);
+        this.init();
+        break;
+    }
+  };
 
   #onFilterChange = (changedFilter) => {
     this.#filter = changedFilter;
-    this.#events = filtrate[this.#filter](this.#initialEvents);
     this.#sort = DEFAULT_SORT;
-    this.#sortListComponent.resetSort();
-    this.#rerenderEventsList();
+    this.#sortListComponent.reset();
+    this.init();
   };
 
   #onSortChange = (changedSort) => {
     this.#sort = changedSort;
-    this.#rerenderEventsList();
+    this.init();
+  };
+
+  #addNewEventClick = () => {
+    this.#newEventButtonComponent.block();
+
+    if (!this.#eventsModel.events.length) {
+      replace(this.#sortListComponent, this.#messageComponent);
+    } else {
+      this.#onFilterChange(DEFAULT_FILTER);
+    }
+
+    this.#eventsPresenter.renderNewEvent();
+  };
+
+  #onNewEventDestroy = () => {
+    this.#newEventButtonComponent.unblock();
+
+    if (!this.#eventsModel.events.length) {
+      this.#renderMessage();
+    }
   };
 }

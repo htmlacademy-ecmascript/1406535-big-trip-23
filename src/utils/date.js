@@ -4,6 +4,7 @@ import { HOURS_IN_DAY, MINUTES_IN_HOUR } from '../consts.js';
 const DATE_FORMATS = {
   day: 'YYYY-MM-DD',
   brief: 'MMM D',
+  briefReversed: 'D MMM',
   time: 'hh:mm',
   machine: 'YYYY-MM-DDTHH:mm',
   dayTime: 'DD/MM/YY HH:mm',
@@ -26,6 +27,10 @@ const date = {
 
   formatBriefDay(value) {
     return dayjs(value).format(DATE_FORMATS.brief);
+  },
+
+  formatBriefDayReversed(value) {
+    return dayjs(value).format(DATE_FORMATS.briefReversed);
   },
 
   formatOnlyTime(value) {

@@ -1,38 +1,34 @@
-import EventsListItemView from '../view/events-list-item-view.js';
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { getObjectFromArrayByKey } from '../utils/utils.js';
+import { UserAction } from '../consts.js';
+import { SortType } from '../utils/sort.js';
 
 const Mode = {
   VIEW: 'view',
   EDIT: 'edit',
-  NEW: 'new',
 };
-
 export default class EventPresenter {
   #container = null;
-  #eventsModel = null;
-  #destinations = null;
-  #offers = null;
-  #event = null;
-  #eventsListItemComponent = null;
   #viewEventComponent = null;
   #editEventComponent = null;
+  #event = null;
+  #destinations = null;
+  #getDestinationById = null;
+  #getDestinationByName = null;
+  #getOffersByType = null;
   #onDataChange = null;
   #onModeChange = null;
   #mode = Mode.VIEW;
 
-  constructor({ container, model, onDataChange, onModeChange }) {
+  constructor({ container, destinations, getDestinationById, getDestinationByName, getOffersByType, onDataChange, onModeChange }) {
     this.#container = container;
-    this.#eventsModel = model;
+    this.#destinations = destinations;
+    this.#getDestinationById = getDestinationById;
+    this.#getDestinationByName = getDestinationByName;
+    this.#getOffersByType = getOffersByType;
     this.#onDataChange = onDataChange;
     this.#onModeChange = onModeChange;
-    this.#destinations = this.#eventsModel.destinations;
-    this.#offers = this.#eventsModel.offers;
-
-    this.#eventsListItemComponent = new EventsListItemView();
-    render(this.#eventsListItemComponent, this.#container);
   }
 
   init(event) {
@@ -40,25 +36,30 @@ export default class EventPresenter {
 
     const prevViewEventComponent = this.#viewEventComponent;
     const prevEditEventComponent = this.#editEventComponent;
-    const typeOffers = getObjectFromArrayByKey(this.#offers, 'type', this.#event.type).offers;
-    const destinationName = getObjectFromArrayByKey(this.#destinations, 'id', this.#event.destination).name;
 
     this.#viewEventComponent = new EventView({
-      event: { ... this.#event, destination: destinationName, typeOffers: typeOffers},
+      event: {
+        ... this.#event,
+        destination: this.#getDestinationById(this.#event.destination).name,
+        typeOffers: this.#getOffersByType(this.#event.type)
+      },
       onEdit: this.#onEdit,
-      onSelect: this.#onSelect,
+      onFavoriteClick: this.#onFavoriteClick,
     });
 
     this.#editEventComponent = new EditEventView({
       event: this.#event,
       destinations: this.#destinations,
-      offers: this.#offers,
+      getDestinationById: this.#getDestinationById,
+      getDestinationByName: this.#getDestinationByName,
+      getOffersByType: this.#getOffersByType,
       onFormSubmit: this.#onFormSubmit,
       onFormReset: this.#onFormReset,
+      onDelete: this.#onDelete,
     });
 
     if (prevViewEventComponent === null || prevEditEventComponent === null) {
-      render(this.#viewEventComponent, this.#eventsListItemComponent.element);
+      render(this.#viewEventComponent, this.#container);
       return;
     }
 
@@ -70,8 +71,8 @@ export default class EventPresenter {
       replace(this.#editEventComponent, prevEditEventComponent);
     }
 
-    remove(prevViewEventComponent);
     remove(prevEditEventComponent);
+    remove(prevViewEventComponent);
   }
 
   resetView() {
@@ -81,7 +82,8 @@ export default class EventPresenter {
   }
 
   destroy() {
-    remove(this.#eventsListItemComponent);
+    remove(this.#viewEventComponent);
+    remove(this.#editEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
   }
 
@@ -93,6 +95,7 @@ export default class EventPresenter {
   }
 
   #changeEditToView() {
+    this.#editEventComponent.reset();
     replace(this.#viewEventComponent, this.#editEventComponent);
     document.removeEventListener('keydown', this.#onEscKeydown);
     this.#mode = Mode.VIEW;
@@ -101,7 +104,6 @@ export default class EventPresenter {
   #onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#editEventComponent.reset();
       this.#changeEditToView();
     }
   };
@@ -110,12 +112,22 @@ export default class EventPresenter {
     this.#changeViewToEdit();
   };
 
-  #onSelect = () => {
-    this.#onDataChange({...this.#event, isFavorite: !this.#event.isFavorite});
+  #onFavoriteClick = () => {
+    this.#onDataChange(UserAction.UPDATE_EVENT, {...this.#event, isFavorite: !this.#event.isFavorite}, { patch: true });
   };
 
-  #onFormSubmit = () => {
-    // this.#onDataChange();
+  #onDelete = () => {
+    this.#onDataChange(UserAction.DELETE_EVENT, this.#event);
+  };
+
+  #onFormSubmit = (event) => {
+    const changedOptions = {
+      [SortType.DATE]: this.#event.dateFrom !== event.dateFrom,
+      [SortType.DURATION]: this.#event.dateFrom !== event.dateFrom || this.#event.dateTo !== event.dateTo,
+      [SortType.PRICE]: this.#event.basePrice !== event.basePrice,
+    };
+
+    this.#onDataChange(UserAction.UPDATE_EVENT, event, changedOptions);
     this.#changeEditToView();
   };
 
