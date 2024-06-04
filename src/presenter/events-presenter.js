@@ -30,7 +30,7 @@ export default class EventsPresenter {
       getDestinationByName: this.#getDestinationByName,
       getOffersByType: this.#getOffersByType,
       onDataChange: this.#onViewAction,
-      onDestroy: this.#onNewEventDestroy,
+      onDestroy: this.#onDestroy,
     });
   }
 
@@ -39,6 +39,8 @@ export default class EventsPresenter {
   }
 
   init(events, sort) {
+    this.#onDestroy();
+
     if (this.#eventPresenters.size) {
       this.#clearEventsList();
     }
@@ -53,6 +55,10 @@ export default class EventsPresenter {
 
   renderNewEvent() {
     this.#newEventPresenter.init(this.destinations);
+  }
+
+  deleteNewEvent() {
+    this.#newEventPresenter.destroy();
   }
 
   #renderEvent(event) {
@@ -70,11 +76,6 @@ export default class EventsPresenter {
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
-  #deleteEvent(event) {
-    this.#eventPresenters.get(event.id).destroy();
-    this.#eventPresenters.delete(event.id);
-  }
-
   #clearEventsList() {
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
@@ -89,19 +90,32 @@ export default class EventsPresenter {
 
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
-        if (changedOptions.patch) {
-          this.#eventsModel.updateEvent(UpdateType.PATCH, update);
-          break;
+        this.#eventPresenters.get(update.id).setSaving();
+        try {
+          if (changedOptions.patch) {
+            await this.#eventsModel.updateEvent(UpdateType.PATCH, update);
+          } else {
+            await this.#eventsModel.updateEvent(changedOptions[this.#sort] ? UpdateType.MAJOR : UpdateType.MINOR, update);
+          }
+        } catch(err) {
+          this.#eventPresenters.get(update.id).setAborting();
         }
-        this.#eventsModel.updateEvent(changedOptions[this.#sort] ? UpdateType.MAJOR : UpdateType.MINOR, update);
         break;
       case UserAction.ADD_EVENT:
-        this.#eventsModel.addEvent(UpdateType.MAJOR, update);
-        this.#onNewEventDestroy();
+        this.#newEventPresenter.setSaving();
+        try {
+          await this.#eventsModel.addEvent(UpdateType.MAJOR, update);
+        } catch(err) {
+          this.#newEventPresenter.setAborting();
+        }
         break;
       case UserAction.DELETE_EVENT:
-        this.#eventsModel.deleteEvent(UpdateType.MINOR, update);
-        this.#deleteEvent(update);
+        this.#eventPresenters.get(update.id).setDeleting();
+        try {
+          await this.#eventsModel.deleteEvent(UpdateType.MINOR, update);
+        } catch(err) {
+          this.#eventPresenters.get(update.id).setAborting();
+        }
         break;
     }
 
@@ -109,12 +123,7 @@ export default class EventsPresenter {
   };
 
   #onModeChange = () => {
-    this.#onNewEventDestroy();
-    this.#eventPresenters.forEach((presenter) => presenter.resetView());
-  };
-
-  #onNewEventDestroy = () => {
-    this.#newEventPresenter.destroy();
     this.#onDestroy();
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 }

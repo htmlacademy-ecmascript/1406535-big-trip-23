@@ -172,7 +172,6 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onDestinationChange = (evt) => {
     if (!this.#getDestinationByName(evt.target.value)) {
-      this.shake();
       evt.target.value = '';
       return;
     }
@@ -232,5 +231,7 @@ export default class EditEventView extends AbstractStatefulView {
     delete event.isDisabled;
     delete event.isSaving;
     delete event.isDeleting;
+
+    return event;
   }
 }

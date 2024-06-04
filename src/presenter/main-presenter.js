@@ -105,38 +105,21 @@ export default class MainPresenter {
   // }
 
   #onModelEvent = (updateType, data) => {
-    switch (updateType) {
-      case UpdateType.PATCH:
-        this.#eventsPresenter.rerenderEvent(data);
-        break;
-      case UpdateType.MINOR:
-        this.#filtersListComponent.update(this.filters);
-        if (data) {
-          this.#eventsPresenter.rerenderEvent(data);
-          return;
-        }
-        if (!this.events.length) {
-          if (!this.#eventsModel.events.length) {
-            this.#filter = DEFAULT_FILTER;
-            this.#filtersListComponent.reset();
-          }
-          this.#renderMessage();
-        }
-        break;
-      case UpdateType.MAJOR:
-        this.#filtersListComponent.update(this.filters);
-        this.init();
-        break;
-      case UpdateType.INIT:
-        this.#filtersListComponent.update(this.filters);
-        if (!this.#eventsModel.destinations.length || !this.#eventsModel.offers.length) {
-          this.#loading = Loading.ERROR;
-        } else {
-          this.#loading = Loading.COMPLETE;
-          this.#newEventButtonComponent.unblock();
-          this.init();
-        }
+    if (data) {
+      this.#eventsPresenter.rerenderEvent(data);
+      return;
     }
+
+    this.#filtersListComponent.update(this.filters);
+    if(updateType === UpdateType.INIT) {
+      if (!this.#eventsModel.destinations.length || !this.#eventsModel.offers.length) {
+        this.#loading = Loading.ERROR;
+      } else {
+        this.#loading = Loading.COMPLETE;
+        this.#newEventButtonComponent.unblock();
+      }
+    }
+    this.init();
   };
 
   #onFilterChange = (changedFilter) => {
@@ -165,6 +148,7 @@ export default class MainPresenter {
 
   #onNewEventDestroy = () => {
     this.#newEventButtonComponent.unblock();
+    this.#eventsPresenter.deleteNewEvent();
 
     if (!this.#eventsModel.events.length) {
       this.#renderMessage();
