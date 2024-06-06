@@ -54,6 +54,7 @@ export default class NewEventPresenter {
       this.#newEventComponent.updateElement({
         isDisabled: false,
         isSaving: false,
+        isDeleting: false,
       });
     };
 

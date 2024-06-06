@@ -153,8 +153,8 @@ export default class MainPresenter {
 
   #addNewEventClick = () => {
     this.#newEventButtonComponent.block();
-    this.#filtersListComponent.reset();
     this.#onFilterChange(DEFAULT_FILTER);
+    this.#filtersListComponent.reset();
 
     if (!this.events.length) {
       replace(this.#sortListComponent, this.#messageComponent);
