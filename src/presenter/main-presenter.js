@@ -122,12 +122,14 @@ export default class MainPresenter {
   #renderMessage() {
     const prevMessageComponent = this.#messageComponent;
     this.#messageComponent = new MessageView({ loading: this.#loading, filter: this.#filter });
+
     if (!prevMessageComponent) {
       replace(this.#messageComponent, this.#sortListComponent);
-    } else {
-      replace(this.#messageComponent, prevMessageComponent);
-      remove(prevMessageComponent);
+      return;
     }
+
+    replace(this.#messageComponent, prevMessageComponent);
+    remove(prevMessageComponent);
   }
 
   #changeMessageToSort() {
@@ -151,6 +153,8 @@ export default class MainPresenter {
 
   #addNewEventClick = () => {
     this.#newEventButtonComponent.block();
+    this.#filtersListComponent.reset();
+    this.#onFilterChange(DEFAULT_FILTER);
 
     if (!this.events.length) {
       replace(this.#sortListComponent, this.#messageComponent);
@@ -177,9 +181,9 @@ export default class MainPresenter {
 
     this.#newEventButtonComponent.unblock();
 
-    if (!this.#eventsModel.events.length) {
-      this.#renderMessage();
-      }
+    if (!this.events.length) {
+      replace(this.#messageComponent, this.#sortListComponent);
+    }
 
     this.#newEventPresenter.destroy();
     this.#isNewForm = false;
