@@ -1,5 +1,5 @@
 const EVENT_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
-const EVENT_DEFAULT_TYPE = 'flight';
+const EVENT_DEFAULT_TYPE = EVENT_TYPES[5];
 
 const NEW_EVENT = {
   basePrice: 0,

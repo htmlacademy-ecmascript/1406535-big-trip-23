@@ -1,15 +1,15 @@
-import {EVENT_TYPES, EVENT_DEFAULT_TYPE} from '../consts.js';
+import { EVENT_TYPES } from '../consts.js';
 
-const createTypeTemplate = (type, selectedType) => {
-  const checkedSign = type === selectedType ? 'checked' : '';
+const capitalizeFirstLetter = (string) => string[0].toUpperCase() + string.slice(1);
 
-  return `<div class="event__type-item">
-    <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${checkedSign}>
-    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type[0].toUpperCase() + type.slice(1)}</label>
+const createTypeTemplate = (type, selectedType) =>
+  `<div class="event__type-item">
+    <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio"
+    name="event-type" value="${type}" ${type === selectedType ? 'checked' : ''}>
+    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${capitalizeFirstLetter(type)}</label>
   </div>`;
-};
 
-const createTypesListTemplate = (type = EVENT_DEFAULT_TYPE, isDisabled) =>
+const createTypesListTemplate = (type, isDisabled) =>
   `<div class="event__type-wrapper">
     <label class="event__type  event__type-btn" for="event-type-toggle-1">
       <span class="visually-hidden">Choose event type</span>
@@ -42,15 +42,15 @@ const createDestinationTemplate = (description, pictures) => {
   </section>`;
 };
 
-const createOfferTemplate = (offer, offersIds, isDisabled) => {
-  const id = offer.title.split(' ').pop();
+const createOfferTemplate = (offer, index, offersIds, isDisabled) => {
+  const id = `${offer.title.split(' ').pop()}-${index}`;
   const checkedSign = offersIds.includes(offer.id) ? 'checked' : '';
   const disabledSign = isDisabled ? 'disabled' : '';
 
   return `<div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}-1" type="checkbox"
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox"
     name="event-offer-${id}" data-id="${offer.id}" ${checkedSign} ${disabledSign}>
-    <label class="event__offer-label" for="event-offer-${id}-1"><span class="event__offer-title">${offer.title}</span>
+    <label class="event__offer-label" for="event-offer-${id}"><span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp; <span class="event__offer-price">${offer.price}</span></label>
   </div>`;
 };
@@ -60,7 +60,7 @@ const createOffersTemplate = (offers, offersIds = [], isDisabled) =>
     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
     <div class="event__available-offers">
-      ${offers.map((item) => createOfferTemplate(item, offersIds, isDisabled)).join('')}
+      ${offers.map((item, index) => createOfferTemplate(item, index, offersIds, isDisabled)).join('')}
     </div>
   </section>`;
 

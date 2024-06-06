@@ -196,7 +196,7 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onViewButtonClick = (evt) => {
     evt.preventDefault();
-    this.reset();
+    // this.reset();
     this.#onReset();
   };
 

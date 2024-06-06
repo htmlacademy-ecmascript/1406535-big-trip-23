@@ -6,7 +6,7 @@ const ID_PREFIX = 'filter-';
 const createFilterTemplate = (filter) =>
   `<div class="trip-filters__filter">
     <input id="${ID_PREFIX}${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter"
-      value="${filter}" ${filter === DEFAULT_FILTER ? 'checked' : ''}>
+      value="${filter}" ${filter === DEFAULT_FILTER ? 'checked' : ''} disabled>
     <label class="trip-filters__filter-label" for="${ID_PREFIX}${filter}">${filter}</label>
   </div>`;
 

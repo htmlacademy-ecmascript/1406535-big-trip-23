@@ -48,7 +48,7 @@ export default class EventsModel extends Observable {
       const response = await this.#apiService.updateEvent(update);
       const updatedEvent = this.#apiService.adaptToClient(response);
       this.#events = [...this.#events.slice(0, index), updatedEvent, ...this.#events.slice(index + 1)];
-      this._notify(updateType, update);
+      this._notify(updateType, updatedEvent);
     } catch(err) {
       throw new Error('Can\'t update event');
     }
@@ -59,7 +59,7 @@ export default class EventsModel extends Observable {
       const response = await this.#apiService.addEvent(update);
       const newEvent = this.#apiService.adaptToClient(response);
       this.#events = [newEvent, ...this.#events];
-      this._notify(updateType);
+      this._notify(updateType, newEvent);
     } catch(err) {
       throw new Error('Can\'t add event');
     }

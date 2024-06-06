@@ -5,11 +5,11 @@ import FiltersListView from '../view/filters-list-view.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
 import SortListView from '../view/sort-list-view.js';
 import MessageView from '../view/message-view.js';
-import { render, RenderPosition, replace } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import { render, RenderPosition, replace, remove } from '../framework/render.js';
 import { getFilters, filtrate, DEFAULT_FILTER } from '../utils/filter.js';
 import { sorting, DEFAULT_SORT } from '../utils/sort.js';
 import { UpdateType, UserAction, Loading, TimeLimit } from '../consts.js';
-import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 
 export default class MainPresenter {
   #topContainer = null;
@@ -25,8 +25,7 @@ export default class MainPresenter {
   #filter = DEFAULT_FILTER;
   #sort = DEFAULT_SORT;
   #loading = Loading.IN_PROGRESS;
-  #isNewEventFormOpen = false;
-  #deletedEvent = null;
+  #isNewForm = false;
 
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
@@ -41,17 +40,11 @@ export default class MainPresenter {
 
     this.#renderFiltersComponent();
     this.#renderNewEventButtonComponent();
-    this.#renderSortsComponent();
+    this.#newEventButtonComponent.block();
+    this.#sortListComponent = new SortListView({ callback: this.#onSortChange });
     this.#renderEventsListComponent();
-
-    this.#newEventPresenter = new NewEventPresenter({
-      container: this.#eventsListComponent.element,
-      getDestinationById: this.#getDestinationById,
-      getDestinationByName: this.#getDestinationByName,
-      getOffersByType: this.#getOffersByType,
-      onDataChange: this.#onViewAction,
-      onDestroy: this.#onNewEventFormDestroy,
-    });
+    this.#messageComponent = new MessageView({ loading: this.#loading, filter: this.#filter });
+    render(this.#messageComponent, this.#bottomContainer, RenderPosition.AFTERBEGIN);
   }
 
   get events() {
@@ -70,22 +63,15 @@ export default class MainPresenter {
   }
 
   init() {
-    this.#filtersListComponent.update(this.filters);
-    if (this.#messageComponent) {
-      this.#removeMessage();
-    }
+    this.#clearEventsList();
 
     if (!this.events.length || this.#loading) {
-      if (!this.#eventsModel.events.length) {
-        this.#filtersListComponent.reset();
-        this.#filter = DEFAULT_FILTER;
-        this.#filtersListComponent.update(this.filters);
-      }
       this.#renderMessage();
       return;
     }
 
-    this.#renderEvents();
+    this.#changeMessageToSort();
+    this.events.forEach((event) => this.#renderEvent(event));
   }
 
   #getDestinationById = (id) => this.#eventsModel.getDestinationById(id);
@@ -103,22 +89,9 @@ export default class MainPresenter {
     this.#newEventButtonComponent.block();
   }
 
-  #renderSortsComponent() {
-    this.#sortListComponent = new SortListView({ callback: this.#onSortChange });
-    render(this.#sortListComponent, this.#bottomContainer, RenderPosition.AFTERBEGIN);
-  }
-
   #renderEventsListComponent() {
     this.#eventsListComponent = new EventsListView();
     render(this.#eventsListComponent, this.#bottomContainer, RenderPosition.BEFOREEND);
-  }
-
-  #renderEvents() {
-    if (this.#eventPresenters.size) {
-      this.#clearEventsList();
-    }
-
-    this.events.forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
@@ -136,48 +109,38 @@ export default class MainPresenter {
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
-  #renderNewEventForm() {
-    this.#newEventPresenter.init(this.destinations);
-  }
-
   #updateEvent(event) {
     this.#eventPresenters.get(event.id).init(event);
   }
 
-  #deleteEvent(event) {
-    this.#eventPresenters.get(event.id).destroy();
-    this.#eventPresenters.delete(event.id);
-  }
-
   #clearEventsList() {
+    this.#onNewEventFormDestroy();
     this.#eventPresenters.forEach((presenter) => presenter.destroy());
     this.#eventPresenters.clear();
   }
 
   #renderMessage() {
+    const prevMessageComponent = this.#messageComponent;
     this.#messageComponent = new MessageView({ loading: this.#loading, filter: this.#filter });
-    replace(this.#messageComponent, this.#sortListComponent);
+    if (!prevMessageComponent) {
+      replace(this.#messageComponent, this.#sortListComponent);
+    } else {
+      replace(this.#messageComponent, prevMessageComponent);
+      remove(prevMessageComponent);
+    }
   }
 
-  // Это тоже не совсем удаление...
-  #removeMessage() {
-    replace(this.#sortListComponent, this.#messageComponent);
-    this.#messageComponent = null;
+  #changeMessageToSort() {
+    if (this.#messageComponent) {
+      replace(this.#sortListComponent, this.#messageComponent);
+      this.#messageComponent = null;
+    }
   }
-
-  // Как это можно назвать? Это нужно если текущий фильтр отличается от дефолтного, но мы грохнули все эвенты.
-  // #something() {
-  //   if (!this.#eventsModel.events.length) {
-  //   this.#filter = DEFAULT_FILTER;
-  //   this.#filtersListComponent.update(this.filters);
-  //   this.#filtersListComponent.reset());
-  //  }
-  // }
 
   #onFilterChange = (changedFilter) => {
-    this.#sortListComponent.reset();
     this.#filter = changedFilter;
     this.#sort = DEFAULT_SORT;
+    this.#sortListComponent.reset();
     this.init();
   };
 
@@ -189,47 +152,52 @@ export default class MainPresenter {
   #addNewEventClick = () => {
     this.#newEventButtonComponent.block();
 
-    if (!this.#eventsModel.events.length) {
+    if (!this.events.length) {
       replace(this.#sortListComponent, this.#messageComponent);
-    } else {
-      this.#onFilterChange(DEFAULT_FILTER);
     }
 
-    this.#renderNewEventForm();
-    this.#isNewEventFormOpen = true;
+    this.#newEventPresenter = new NewEventPresenter({
+      container: this.#eventsListComponent.element,
+      destinations: this.destinations,
+      getDestinationById: this.#getDestinationById,
+      getDestinationByName: this.#getDestinationByName,
+      getOffersByType: this.#getOffersByType,
+      onDataChange: this.#onViewAction,
+      onDestroy: this.#onNewEventFormDestroy,
+    });
+
+    this.#newEventPresenter.init();
+    this.#isNewForm = true;
   };
 
   #onNewEventFormDestroy = () => {
+    if (!this.#isNewForm) {
+      return;
+    }
+
     this.#newEventButtonComponent.unblock();
-    this.#newEventPresenter.destroy();
 
     if (!this.#eventsModel.events.length) {
       this.#renderMessage();
-    }
-    this.#isNewEventFormOpen = false;
+      }
+
+    this.#newEventPresenter.destroy();
+    this.#isNewForm = false;
   };
 
   #onModeChange = () => {
-    if (this.#isNewEventFormOpen) {
-      this.#onNewEventFormDestroy();
-    }
-
+    this.#onNewEventFormDestroy();
     this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 
   #onModelEvent = (updateType, data) => {
-    if (data) {
-      this.#updateEvent(data);
-      return;
-    }
+    this.#filtersListComponent.update(this.filters);
+
     switch (updateType) {
-      case UpdateType.MINOR:
-        this.#deleteEvent(this.#deletedEvent);
+      case UpdateType.PATCH:
+        this.#updateEvent(data);
         break;
-      case UpdateType.MAJOR:
-        if (this.#isNewEventFormOpen) {
-          this.#onNewEventFormDestroy();
-        }
+      case UpdateType.MINOR:
         this.init();
         break;
       case UpdateType.INIT:
@@ -243,18 +211,14 @@ export default class MainPresenter {
     }
   };
 
-  #onViewAction = async (actionType, update, changedOptions) => {
+  #onViewAction = async (actionType, updateType, update) => {
     this.#uiBlocker.block();
 
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
         this.#eventPresenters.get(update.id).setSaving();
         try {
-          if (changedOptions.patch) {
-            await this.#eventsModel.updateEvent(UpdateType.PATCH, update);
-          } else {
-            await this.#eventsModel.updateEvent(changedOptions[this.#sort] ? UpdateType.MAJOR : UpdateType.MINOR, update);
-          }
+          await this.#eventsModel.updateEvent(updateType, update);
         } catch(err) {
           this.#eventPresenters.get(update.id).setAborting();
         }
@@ -262,7 +226,7 @@ export default class MainPresenter {
       case UserAction.ADD_EVENT:
         this.#newEventPresenter.setSaving();
         try {
-          await this.#eventsModel.addEvent(UpdateType.MAJOR, update);
+          await this.#eventsModel.addEvent(updateType, update);
         } catch(err) {
           this.#newEventPresenter.setAborting();
         }
@@ -270,8 +234,7 @@ export default class MainPresenter {
       case UserAction.DELETE_EVENT:
         this.#eventPresenters.get(update.id).setDeleting();
         try {
-          await this.#eventsModel.deleteEvent(UpdateType.MINOR, update);
-          this.#deletedEvent = update;
+          await this.#eventsModel.deleteEvent(updateType, update);
         } catch(err) {
           this.#eventPresenters.get(update.id).setAborting();
         }
