@@ -4,6 +4,7 @@ import { date } from '../utils/date.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import he from 'he';
+import { FIVE_MINUTES } from '../consts.js';
 
 const createEditEventTemplate = (event, destinations, typeOffers) => {
   const { offers: offersIds, destination, type, basePrice, dateFrom, dateTo, isDisabled, isSaving, isDeleting } = event;
@@ -47,10 +48,10 @@ const createEditEventTemplate = (event, destinations, typeOffers) => {
           <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>
             ${isSaving ? 'Saving...' : 'Save'}
           </button>
-          <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>
+          <button class="event__reset-btn" type="reset">
             ${isDeleting ? 'Deleting...' : 'Delete'}
           </button>
-          <button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''}><span class="visually-hidden">Open event</span></button>
+          <button class="event__rollup-btn" type="button"><span class="visually-hidden">Open event</span></button>
         </header>
 
         ${detailsTemplate}
@@ -84,10 +85,10 @@ export default class EditEventView extends AbstractStatefulView {
     this.#onReset = onFormReset;
     this.#onSubmit = onFormSubmit;
     this.#onDelete = onDelete;
+    this.#onCancel = onCancel;
     this.#typeOffers = this.#getOffersByType(event.type);
 
-    if (onCancel) {
-      this.#onCancel = onCancel;
+    if (!event.id) {
       this.#isNewEvent = true;
     }
 
@@ -159,9 +160,7 @@ export default class EditEventView extends AbstractStatefulView {
   }
 
   #getCheckedOfferIds() {
-    const checkedOffers = [];
-    this.element.querySelectorAll('.event__offer-checkbox:checked').forEach((offer) => checkedOffers.push(offer.dataset.id));
-    return checkedOffers;
+    return Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'), (offer) => offer.dataset.id);
   }
 
   #onEventTypeChange = (evt) => {
@@ -182,7 +181,7 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onStartDateChange = ([userDate]) => {
     this._setState({ dateFrom: userDate });
-    this.#datapickerEnd.set('minDate', userDate);
+    this.#datapickerEnd.set('minDate', userDate.getTime() + FIVE_MINUTES);
   };
 
   #onEndDateChange = ([userDate]) => {
@@ -198,7 +197,6 @@ export default class EditEventView extends AbstractStatefulView {
 
   #onViewButtonClick = (evt) => {
     evt.preventDefault();
-    this.reset();
     this.#onReset();
   };
 

@@ -1,8 +1,7 @@
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
-import { render, replace, remove } from '../framework/render.js';
-import { UserAction } from '../consts.js';
-import { SortType } from '../utils/sort.js';
+import { render, replace, remove, RenderPosition } from '../framework/render.js';
+import { UserAction, UpdateType } from '../consts.js';
 
 const Mode = {
   VIEW: 'view',
@@ -13,7 +12,7 @@ export default class EventPresenter {
   #viewEventComponent = null;
   #editEventComponent = null;
   #event = null;
-  #destinations = null;
+  #destinations = [];
   #getDestinationById = null;
   #getDestinationByName = null;
   #getOffersByType = null;
@@ -59,7 +58,7 @@ export default class EventPresenter {
     });
 
     if (prevViewEventComponent === null || prevEditEventComponent === null) {
-      render(this.#viewEventComponent, this.#container);
+      render(this.#viewEventComponent, this.#container, RenderPosition.BEFOREEND);
       return;
     }
 
@@ -106,7 +105,7 @@ export default class EventPresenter {
   }
 
   setAborting() {
-    if (this.#mode !== Mode.VIEW) {
+    if (this.#mode === Mode.VIEW) {
       this.#viewEventComponent.shake();
       return;
     }
@@ -147,22 +146,15 @@ export default class EventPresenter {
   };
 
   #onFavoriteClick = () => {
-    this.#onDataChange(UserAction.UPDATE_EVENT, {...this.#event, isFavorite: !this.#event.isFavorite}, { patch: true });
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, {...this.#event, isFavorite: !this.#event.isFavorite});
   };
 
   #onDelete = () => {
-    this.#onDataChange(UserAction.DELETE_EVENT, this.#event);
+    this.#onDataChange(UserAction.DELETE_EVENT, UpdateType.MINOR, this.#event);
   };
 
   #onFormSubmit = (event) => {
-    const changedOptions = {
-      [SortType.DATE]: this.#event.dateFrom !== event.dateFrom,
-      [SortType.DURATION]: this.#event.dateFrom !== event.dateFrom || this.#event.dateTo !== event.dateTo,
-      [SortType.PRICE]: this.#event.basePrice !== event.basePrice,
-    };
-
-    this.#onDataChange(UserAction.UPDATE_EVENT, event, changedOptions);
-    this.#changeEditToView();
+    this.#onDataChange(UserAction.UPDATE_EVENT, UpdateType.MINOR, event);
   };
 
   #onFormReset = () => {

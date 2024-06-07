@@ -17,7 +17,7 @@ const createEventTemplate = (event) => {
   const eventEndTimeMachine = date.formatMachineTime(dateTo);
   const eventDuration = date.calcAndFormatDuration(dateFrom, dateTo);
 
-  const offersTemplate = offersIds.length !== 0 ?
+  const offersTemplate = offersIds.length ?
     offersIds.map((id) => createOfferTemplate(getObjectFromArrayByKey(typeOffers, 'id', id))).join('') : '';
 
   const FavoriteClassName = event.isFavorite ? 'event__favorite-btn--active' : '';

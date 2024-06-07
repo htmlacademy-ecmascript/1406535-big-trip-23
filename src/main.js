@@ -2,9 +2,7 @@ import EventsModel from './model/events-model.js';
 import MainPresenter from './presenter/main-presenter.js';
 import TripInfoPresenter from './presenter/trip-info-presenter.js';
 import EventsApiService from './events-api-service.js';
-
-const URL = 'https://23.objects.htmlacademy.pro/big-trip';
-const AUTHORIZATION = 'Basic [htypyftnxnj';
+import { URL, AUTHORIZATION } from './consts.js';
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripEventsElement = document.querySelector('.trip-events');

@@ -5,7 +5,6 @@ import { sorting, DEFAULT_SORT } from '../utils/sort.js';
 import { UpdateType } from '../consts.js';
 
 const SHOWN_POINTS = 3;
-
 export default class TripInfoPresenter {
   #container = null;
   #eventsModel = null;
@@ -58,13 +57,13 @@ export default class TripInfoPresenter {
   }
 
   #getTripWay() {
-    const wayPoints = [];
+    let wayPoints = [];
 
     if (this.events.length > SHOWN_POINTS) {
       wayPoints.push(this.#eventsModel.getDestinationNameById(this.#firstEvent.destination),
         '...', this.#eventsModel.getDestinationNameById(this.#lastEvent.destination));
     } else {
-      this.events.forEach((event) => wayPoints.push(this.#eventsModel.getDestinationNameById(event.destination)));
+      wayPoints = Array.from(this.events, (event) => this.#eventsModel.getDestinationNameById(event.destination));
     }
     return wayPoints.join(' — ');
   }
