@@ -157,7 +157,7 @@ export default class MainPresenter {
     this.#filtersListComponent.reset();
 
     if (!this.events.length) {
-      replace(this.#sortListComponent, this.#messageComponent);
+      this.#changeMessageToSort();
     }
 
     this.#newEventPresenter = new NewEventPresenter({
@@ -169,7 +169,6 @@ export default class MainPresenter {
       onDataChange: this.#onViewAction,
       onDestroy: this.#onNewEventFormDestroy,
     });
-
     this.#newEventPresenter.init();
     this.#isNewForm = true;
   };
@@ -180,13 +179,12 @@ export default class MainPresenter {
     }
 
     this.#newEventButtonComponent.unblock();
-
-    if (!this.events.length) {
-      replace(this.#messageComponent, this.#sortListComponent);
-    }
-
     this.#newEventPresenter.destroy();
     this.#isNewForm = false;
+
+    if (!this.events.length) {
+      this.#renderMessage();
+    }
   };
 
   #onModeChange = () => {

@@ -58,7 +58,7 @@ export default class EventsModel extends Observable {
     try {
       const response = await this.#apiService.addEvent(update);
       const newEvent = this.#apiService.adaptToClient(response);
-      this.#events = [newEvent, ...this.#events];
+      this.#events.push(newEvent);
       this._notify(updateType, newEvent);
     } catch(err) {
       throw new Error('Can\'t add event');
