@@ -5,6 +5,7 @@ import { sorting, DEFAULT_SORT } from '../utils/sort.js';
 import { UpdateType } from '../consts.js';
 
 const SHOWN_POINTS = 3;
+
 export default class TripInfoPresenter {
   #container = null;
   #eventsModel = null;

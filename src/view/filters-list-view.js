@@ -21,6 +21,7 @@ const createFiltersListTemplate = () =>
       </div>
     </div>
   </div>`;
+
 export default class FiltersListView extends AbstractView {
   #filterElements = null;
 

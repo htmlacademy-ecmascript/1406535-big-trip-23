@@ -1,12 +1,13 @@
 import EventView from '../view/event-view.js';
 import EditEventView from '../view/edit-event-view.js';
-import { render, replace, remove, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType } from '../consts.js';
+import { render, replace, remove, RenderPosition } from '../framework/render.js';
 
 const Mode = {
   VIEW: 'view',
   EDIT: 'edit',
 };
+
 export default class EventPresenter {
   #container = null;
   #viewEventComponent = null;

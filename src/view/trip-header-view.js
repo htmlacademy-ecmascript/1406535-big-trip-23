@@ -16,6 +16,7 @@ const createTripHeaderTemplate = ({ title, dateFrom, dateTo, price }) => {
     </p>
   </section>`;
 };
+
 export default class TripHeaderView extends AbstractView {
   #data = null;
 
