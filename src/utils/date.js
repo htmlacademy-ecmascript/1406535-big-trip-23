@@ -50,12 +50,12 @@ const date = {
     const restHours = extendTwoLetter(resultHours % HOURS_IN_DAY);
     const restMinutes = extendTwoLetter(end.diff(start, 'minute') % MINUTES_IN_HOUR);
 
-    const resultWords = [];
-    resultWords.push(
+    const resultParts = [];
+    resultParts.push(
       (resultDays ? `${extendTwoLetter(resultDays)}D` : ''),
       (resultHours ? `${restHours}H` : ''),
       `${restMinutes}M`);
-    return resultWords.join(' ').trim();
+    return resultParts.join(' ').trim();
   },
 
   calcDuration(start, end) {
