@@ -7,6 +7,7 @@ const Mode = {
   VIEW: 'view',
   EDIT: 'edit',
 };
+
 export default class EventPresenter {
   #container = null;
   #viewEventComponent = null;

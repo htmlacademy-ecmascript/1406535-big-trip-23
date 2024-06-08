@@ -12,6 +12,7 @@ const createSortTemplate = (sort) => {
       <label class="trip-sort__btn" for="${ID_PREFIX}${sort}">${sort}</label>
     </div>`;
 };
+
 export default class SortListView extends AbstractView {
   #sortElements = null;
 

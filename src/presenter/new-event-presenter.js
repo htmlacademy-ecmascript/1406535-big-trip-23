@@ -1,6 +1,7 @@
 import EditEventView from '../view/edit-event-view.js';
 import { render, remove, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType, NEW_EVENT } from '../consts.js';
+
 export default class NewEventPresenter {
   #container = null;
   #newEventComponent = null;
