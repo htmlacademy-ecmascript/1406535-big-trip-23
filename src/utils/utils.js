@@ -1,1 +1,1 @@
-export const getObjectFromArrayByKey = (arr, key, value) => arr.find((obj) => obj[key] === value);
+export const getObjectFromArrayByKey = (items, key, value) => items.find((item) => item[key] === value);

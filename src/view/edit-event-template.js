@@ -1,6 +1,6 @@
 import { EVENT_TYPES } from '../consts.js';
 
-const capitalizeFirstLetter = (string) => string[0].toUpperCase() + string.slice(1);
+const capitalizeFirstLetter = (word) => word[0].toUpperCase() + word.slice(1);
 
 const createTypeTemplate = (type, selectedType) =>
   `<div class="event__type-item">
